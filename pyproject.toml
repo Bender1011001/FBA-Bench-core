@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "fba-bench-core"
+version = "0.1.0"
+description = "Core library for FBA-Bench"
+authors = ["FBA Team <devnull@example.com>"]
+readme = "README.md"
+packages = [
+  { include = "fba_bench_core", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.13"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

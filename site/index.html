@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Analytics is optional and opt-in: Disabled by default. Enable via site/config.js if desired. No tracking occurs unless explicitly configured. -->
+  <meta charset="utf-8">
+  <title>FBA-Bench: Leading AI Agent Benchmark for E-Commerce</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FBA-Bench Core: Open-source benchmarks, scenarios, and metrics for evaluating AI agents in e-commerce. Reproducible, tiered challenges with golden master validation.">
+  <meta property="og:title" content="FBA-Bench: Leading AI Agent Benchmark for E-Commerce">
+  <meta property="og:description" content="Discover FBA-Bench, the premier open benchmark for AI agents in e-commerce. Explore tiers 0-2 scenarios, baselines, and metrics for trustworthy automation.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/press/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FBA-Bench: Leading AI Agent Benchmark for E-Commerce">
+  <meta name="twitter:description" content="FBA-Bench Core: Benchmarks and tools for AI in e-commerce. Source-available and reproducible.">
+  <meta name="twitter:image" content="assets/press/og-image.png">
+  <script src="./config.js"></script>
+  <script>
+    // Basic Analytics Opt-in (Core) - Disabled by default, privacy-friendly
+    (function() {
+      'use strict';
+
+      // Define no-op analytics if conditions fail
+      function createNoOpAnalytics() {
+        window.analytics = {
+          page: function() {},
+          track: function(eventName, payload) {}
+        };
+      }
+
+      // Create console-based adapter if conditions pass
+      function createConsoleAdapter() {
+        window.analytics = {
+          page: function() {
+            console.log('[FBA Analytics] Page view:', window.location.pathname);
+          },
+          track: function(eventName, payload) {
+            console.log('[FBA Analytics] Track event:', eventName, payload);
+          }
+        };
+
+        // Optional: Send initial page call on DOMContentLoaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            window.analytics.page();
+          });
+        } else {
+          window.analytics.page();
+        }
+
+        // Comment: Insert real provider script here if desired, e.g.:
+        // if (window.ANALYTICS_CONFIG.provider === 'plausible' && window.ANALYTICS_CONFIG.endpoint) {
+        //   const script = document.createElement('script');
+        //   script.defer = true;
+        //   script.setAttribute('data-domain', window.ANALYTICS_CONFIG.trackingId);
+        //   script.src = window.ANALYTICS_CONFIG.endpoint;
+        //   document.head.appendChild(script);
+        // }
+      }
+
+      // Read config
+      const config = window.ANALYTICS_CONFIG;
+      if (!config || typeof config !== 'object') {
+        createNoOpAnalytics();
+        return;
+      }
+
+      // Check DNT condition
+      const dntRespected = config.respectDNT && (navigator.doNotTrack === '1' || navigator.doNotTrack === 1);
+      const dntAllows = !config.respectDNT || !dntRespected;
+
+      // Check other conditions
+      const idValid = config.trackingId && config.trackingId.trim() !== '';
+      const endpointValid = config.provider === 'placeholder' || (config.endpoint && config.endpoint.trim() !== '');
+
+      // Conditions: enabled, DNT allows, trackingId non-empty, endpoint if required
+      const conditionsPass = config.enabled && dntAllows && idValid && endpointValid;
+
+      if (conditionsPass) {
+        createConsoleAdapter();
+      } else {
+        createNoOpAnalytics();
+      }
+    })();
+  </script>
+  <style>
+    :root { --bg:#0b0e14; --fg:#e6e6e6; --muted:#a8b0bd; --accent:#61dafb; --card:#121722; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:40px 20px; text-align:center; background:linear-gradient(135deg, #121722, #0b0e14); border-bottom:1px solid #1f2530; }
+    nav { margin-bottom: 20px; }
+    nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; gap: 20px; }
+    nav a { color: var(--accent); text-decoration: none; padding: 10px; }
+    nav a:hover, nav .active { text-decoration: underline; }
+    h1 { margin:0 0 10px; font-size:32px; }
+    p.lead { margin:0; color:var(--muted); }
+    main { max-width:940px; margin:30px auto; padding:0 16px 60px; }
+    section { background:var(--card); border:1px solid #1f2530; border-radius:10px; padding:20px; margin-bottom:18px; }
+    h2 { margin-top:0; font-size:22px; }
+    code, pre { background:#0e1320; color:#d6deeb; border:1px solid #1f2530; border-radius:6px; }
+    pre { padding:12px; overflow:auto; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    ul { margin:0 0 0 18px; }
+    footer { text-align:center; color:var(--muted); padding:20px; border-top:1px solid #1f2530; }
+
+    .cta-button {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .cta-button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="press.html">Press</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+      </ul>
+    </nav>
+    <h1>FBA-Bench Core</h1>
+    <p class="lead">Public benchmark scenarios (tiers 0–2), metrics, baselines, and golden master validation</p>
+
+    <!-- Placeholder mailto; replace with real link (e.g., Calendly or /contact.html) in production -->
+    <a href="./leaderboard.html" class="cta-button" aria-label="Get started with the leaderboard">Get Started</a>
+  </header>
+  <main>
+    <section class="cta-section" style="background: linear-gradient(135deg, var(--accent), #4dabf7); color: var(--bg); text-align: center; border-radius: 10px; margin-bottom: 20px;">
+      <h2 style="margin: 0 0 10px; font-size: 28px;">Ready to Benchmark Your AI Agents?</h2>
+      <p style="margin: 0 0 20px; font-size: 18px;">Join the leading standard for e-commerce AI evaluation with reproducible scenarios and trusted metrics.</p>
+      <a href="./leaderboard.html" class="cta-button" style="background: var(--bg); color: var(--accent); margin-right: 10px;" aria-label="Get started with the leaderboard">Get Started</a>
+      <a href="mailto:press@example.com" style="color: var(--bg); text-decoration: underline; font-weight: bold;">Contact</a>
+    </section>
+    <section>
+      <h2>Overview</h2>
+      <p>FBA-Bench Core is the source-available subset of the FBA-Bench benchmark. It includes a metrics suite, baseline agents, and tiered scenarios, with golden master artifacts for regression detection.</p>
+      <p><a href="../README.md">Open the Trust Dossier (README)</a></p>
+    </section>
+
+    <section>
+      <h2>Quick Start</h2>
+      <pre><code># from repo root
+python -m venv .venv
+# Windows PowerShell
+.\\\.venv\\Scripts\\Activate.ps1
+# macOS/Linux
+# source .venv/bin/activate
+pip install -e repos/fba-bench-core
+pytest -q
+# Optional: golden master JSON validation
+python - <<'PY'
+import os, json, glob, sys
+gm_dir = os.path.join('repos', 'fba-bench-core', 'golden_masters')
+if os.path.isdir(gm_dir):
+    fail = False
+    for p in glob.glob(os.path.join(gm_dir, '**', '*.json'), recursive=True):
+        try:
+            json.load(open(p, 'r', encoding='utf-8'))
+            print("[OK]", p)
+        except Exception as e:
+            print("[FAIL]", p, e)
+            fail = True
+    sys.exit(1 if fail else 0)
+else:
+    print("golden_masters/ not found; skipping")
+    sys.exit(0)
+PY</code></pre>
+    </section>
+
+    <section>
+      <h2>Scenarios</h2>
+      <ul>
+        <li>Tier 0 — <code>src/scenarios/tier_0_baseline.yaml</code></li>
+        <li>Tier 1 — <code>src/scenarios/tier_1_moderate.yaml</code></li>
+        <li>Tier 2 — <code>src/scenarios/tier_2_advanced.yaml</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs/architecture.md">Architecture Overview</a></li>
+        <li><a href="../docs/README.md">Documentation README</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Academic Paper</h2>
+      <p>Coming soon: Formal academic paper detailing the FBA-Bench methodology and evaluation framework.</p>
+    </section>
+
+    <section>
+      <h2>Leaderboard</h2>
+      <p>Reference leaderboard for agent performance (placeholder; integration planned for Phase 2).</p>
+    </section>
+  </main>
+  <footer>
+    <nav role="navigation" aria-label="Footer navigation">
+      <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <li><a href="index.html" style="color: var(--accent); text-decoration: none; padding: 10px;">Home</a></li>
+        <li><a href="press.html" style="color: var(--accent); text-decoration: none; padding: 10px;">Press</a></li>
+        <li><a href="research.html" style="color: var(--accent); text-decoration: none; padding: 10px;">Research</a></li>
+        <li><a href="leaderboard.html" style="color: var(--accent); text-decoration: none; padding: 10px;">Leaderboard</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2025 FBA-Bench Project. Source-available under placeholder license. See <a href="../LICENSE">LICENSE</a>.</p>
+  </footer>
+</body>
+</html>

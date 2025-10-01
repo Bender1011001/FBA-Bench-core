@@ -1,0 +1,5 @@
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="100" fill="#e6e6e6"/>
+  <text x="150" y="60" font-family="system-ui, sans-serif" font-size="32" fill="#0b0e14" text-anchor="middle" font-weight="bold">FBA-Bench</text>
+  <text x="150" y="85" font-family="system-ui, sans-serif" font-size="14" fill="#61dafb" text-anchor="middle">Light Variant</text>
+</svg>
