@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "FBA Bench"
+type: software
+authors:
+  - given-names: "John"
+    family-names: "Doe"
+  - given-names: "Jane"
+    family-names: "Smith"
+  - given-names: "Alex"
+    family-names: "Johnson"
+repository-code: https://github.com/OWNER/REPO
+url: https://github.com/OWNER/REPO
+version: 0.1.0
+date-released: 2025-01-01
+identifiers:
+  - type: doi
+    value: 10.0000/placeholder

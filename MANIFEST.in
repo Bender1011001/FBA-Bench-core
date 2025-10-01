@@ -1,0 +1,6 @@
+# Ensure non-Python data are packaged for both sdist and wheel
+recursive-include src *.yaml *.yml *.json *.md *.txt *.html
+# Be explicit for likely data locations
+recursive-include src/scenarios *.yaml *.yml
+recursive-include src/golden_masters *.json *.yaml *.yml
+recursive-include src/reproducibility *.yaml *.yml *.json *.md
