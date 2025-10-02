@@ -1,0 +1,42 @@
+name: Deploy static site to gh-pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine publish directory
+        id: pubdir
+        shell: bash
+        run: |
+          if [ -d "sites" ]; then
+            echo "dir=sites" >> "$GITHUB_OUTPUT"
+          elif [ -d "site" ]; then
+            echo "dir=site" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: neither 'sites' nor 'site' directory exists at repo root." 1>&2
+            ls -la
+            exit 1
+          fi
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: ${{ steps.pubdir.outputs.dir }}
+          clean: true
+          single-commit: true
