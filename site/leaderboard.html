@@ -37,6 +37,9 @@
     .error { color: #ff6b6b; }
     table caption { font-weight: bold; margin-bottom: 10px; }
     .table-wrapper { overflow-x: auto; }
+    .tabs { display:flex; gap:8px; justify-content:center; margin:10px 0; flex-wrap:wrap; }
+    .tabs a { padding:8px 12px; border:1px solid #1f2530; border-radius:999px; color:var(--accent); text-decoration:none; background:#0e1320; }
+    .tabs a.active { background: var(--accent); color: var(--bg); }
     footer { text-align:center; color:var(--muted); padding:20px; border-top:1px solid #1f2530; }
   </style>
 </head>
@@ -55,6 +58,11 @@
   <main>
     <section>
       <p>This is a public, opt-in scoreboard showcasing benchmark results and contributions from the FBA-Bench community. Teams can submit their agent performance for ranking.</p>
+      <div class="tabs" id="tier-tabs" role="tablist" aria-label="Leaderboard tiers">
+        <a href="?tier=0" role="tab" data-tier="0" aria-selected="false">Tier 0</a>
+        <a href="?tier=1" role="tab" data-tier="1" aria-selected="true">Tier 1</a>
+        <a href="?tier=2" role="tab" data-tier="2" aria-selected="false">Tier 2</a>
+      </div>
       <div id="leaderboard-container">
         <div class="loading">Loading leaderboard...</div>
       </div>
@@ -62,26 +70,57 @@
     </section>
   </main>
   <footer>
-    <p>&copy; 2025 FBA-Bench Project. Source-available under placeholder license. See <a href="https://github.com/Bender1011001/FBA-Bench-core/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a>.</p>
+    <p>&copy; 2025 FBA-Bench Project. Source-available. See <a href="https://github.com/Bender1011001/FBA-Bench-core/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a>.</p>
   </footer>
   <script>
-    async function loadLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      try {
-        const response = await fetch('./data/leaderboard.json');
-        if (!response.ok) throw new Error('Failed to load data');
-        const data = await response.json();
-        if (data.length === 0) {
+    (function() {
+      'use strict';
+
+      function getTierFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get('tier');
+        const n = t !== null ? Number(t) : NaN;
+        return [0,1,2].includes(n) ? n : 1;
+      }
+
+      function setActiveTab(tier) {
+        const links = document.querySelectorAll('#tier-tabs a[data-tier]');
+        links.forEach(a => {
+          const isActive = Number(a.dataset.tier) === tier;
+          a.classList.toggle('active', isActive);
+          a.setAttribute('aria-selected', String(isActive));
+        });
+      }
+
+      async function fetchTierData(tier) {
+        const path = `./data/leaderboard_tier_${tier}.json`;
+        try {
+          const resp = await fetch(path, { cache: 'no-store' });
+          if (!resp.ok) throw new Error(`Failed to load ${path}`);
+          return await resp.json();
+        } catch (e) {
+          if (tier === 1) {
+            try {
+              const legacy = await fetch('./data/leaderboard.json', { cache: 'no-store' });
+              if (legacy.ok) return await legacy.json();
+            } catch (_) {}
+          }
+          throw e;
+        }
+      }
+
+      function renderTable(container, data) {
+        if (!Array.isArray(data) || data.length === 0) {
           container.innerHTML = '<div class="empty">No entries yet. Be the first to contribute!</div>';
           return;
         }
-        // Sort: Score desc, then Date desc
         data.sort((a, b) => {
           if (b.score !== a.score) return b.score - a.score;
           return new Date(b.date) - new Date(a.date);
         });
         const lastUpdated = data.reduce((max, e) => Math.max(max, +new Date(e.date)), 0);
         const lastUpdatedStr = new Date(lastUpdated).toISOString().slice(0,10);
+
         let tableHTML = `
           <div class="leaderboard-meta" style="display:flex; justify-content: space-between; align-items:center; gap:12px; flex-wrap:wrap;">
             <span>Total entries: ${data.length}</span>
@@ -113,13 +152,53 @@
               <td>${notes}</td>
             </tr>`;
         });
-        tableHTML += '</tbody></table></div><p style="margin-top:10px;color:var(--muted);">Data source: <a href="data/leaderboard.json">data/leaderboard.json</a>. To submit results, open an issue or PR.</p>';
+        tableHTML += '</tbody></table></div>';
         container.innerHTML = tableHTML;
-      } catch (error) {
-        container.innerHTML = `<div class="error">Unable to load leaderboard data. Please check back later or contact support. (Error: ${error.message})</div><p>Note: If viewing locally, some browsers restrict fetch from file:// paths. Use a simple static server (e.g., python -m http.server).</p>`;
       }
-    }
-    loadLeaderboard();
+
+      async function loadAndRender(tier, pushStateUpdate) {
+        const container = document.getElementById('leaderboard-container');
+        container.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+        setActiveTab(tier);
+        try {
+          const data = await fetchTierData(tier);
+          renderTable(container, data);
+          const sourcePath = `data/leaderboard_tier_${tier}.json`;
+          const info = document.createElement('p');
+          info.style.marginTop = '10px';
+          info.style.color = 'var(--muted)';
+          info.innerHTML = `Data source: <a href="${sourcePath}">${sourcePath}</a>. To submit results, open an issue or PR.`;
+          container.appendChild(info);
+        } catch (error) {
+          container.innerHTML = `<div class="error">Unable to load leaderboard data. Please check back later or contact support. (Error: ${error.message})</div><p>Note: If viewing locally, some browsers restrict fetch from file:// paths. Use a simple static server (e.g., python -m http.server).</p>`;
+        }
+        if (pushStateUpdate) {
+          history.pushState({ tier }, '', `?tier=${tier}`);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const initialTier = getTierFromURL();
+        loadAndRender(initialTier, false);
+
+        const tabs = document.getElementById('tier-tabs');
+        if (tabs) {
+          tabs.addEventListener('click', function(e) {
+            const a = e.target.closest('a[data-tier]');
+            if (!a) return;
+            e.preventDefault();
+            const tier = Number(a.dataset.tier);
+            if (Number.isNaN(tier)) return;
+            loadAndRender(tier, true);
+          });
+        }
+
+        window.addEventListener('popstate', function(ev) {
+          const tier = ev.state && typeof ev.state.tier === 'number' ? ev.state.tier : getTierFromURL();
+          loadAndRender(tier, false);
+        });
+      });
+    })();
   </script>
 </body>
 </html>
