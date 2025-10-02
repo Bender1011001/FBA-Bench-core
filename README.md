@@ -106,22 +106,6 @@ Contributions are welcome for the public core:
 - Ensure tests pass and golden-master validation remains stable.
 - Follow Conventional Commits if possible.
 
-## Public site (static)
-
-### Local Preview
-- **Option 1**: Open `site/index.html` directly in a browser for quick viewing.
-- **Option 2**: Serve locally without additional tooling, e.g., from the repository root:
-  ```
-  cd site
-  python -m http.server 8000
-  ```
-  Then visit `http://localhost:8000`. (Python 3.7+; no dependencies added to repo.)
-
-### Publishing to GitHub Pages
-- In the repository settings on GitHub, navigate to Pages.
-- Set source to "Deploy from a branch", branch: main (or default), folder: `/site`.
-- Save; the site will build and publish at `https://<username>.github.io/fba-bench-core/` (adjust for org repos).
-- Any push to files under `/site` triggers a rebuild and update. Settings may vary by organization.
 
 ### Leaderboard
 
