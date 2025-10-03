@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  # Test runner service: mounts repo but does not mount any venv paths.
+  fba-bench:
+    build: .
+    image: fba-bench-core:dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    command: pytest -v
+
+  # Interactive dev shell: persists a dedicated venv in the container via a named volume.
+  # The venv is not created automatically; after attaching you can run:
+  #   python -m venv /opt/venv && source /opt/venv/bin/activate && pip install -e ".[dev]"
+  dev:
+    build: .
+    image: fba-bench-core:dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - venv:/opt/venv
+    environment:
+      - VIRTUAL_ENV=/opt/venv
+      - PATH=/opt/venv/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    entrypoint: ["bash"]
+    stdin_open: true
+    tty: true
+
+volumes:
+  venv:

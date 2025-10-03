@@ -1,18 +1,21 @@
+#
+# ARXIV PLACEHOLDER — SINGLE SOURCE OF TRUTH
+# The literal token "ARXIV_ID" is used across the repository until the real arXiv ID is assigned.
+# Once available (e.g., 2501.01234), perform a repo-wide replacement of "ARXIV_ID" with the real ID.
+# Recommended commands:
+#   POSIX (macOS/Linux):
+#     git grep -l 'ARXIV_ID' | xargs -I{} sed -i'' -e 's/ARXIV_ID/2501.01234/g' {}
+#   Windows PowerShell:
+#     git grep -l 'ARXIV_ID' | % { (Get-Content $_) -replace 'ARXIV_ID','2501.01234' | Set-Content $_ }
+# After replacement, re-run validation and CI to ensure links and citations render correctly.
+#
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "FBA Bench"
 type: software
 authors:
-  - given-names: "John"
-    family-names: "Doe"
-  - given-names: "Jane"
-    family-names: "Smith"
-  - given-names: "Alex"
-    family-names: "Johnson"
-repository-code: https://github.com/OWNER/REPO
-url: https://github.com/OWNER/REPO
+  - name: FBA-Bench Core Team
+    email: contact@fba-bench.ai
+    affiliation: FBA-Bench Project
 version: 0.1.0
 date-released: 2025-01-01
-identifiers:
-  - type: doi
-    value: 10.0000/placeholder

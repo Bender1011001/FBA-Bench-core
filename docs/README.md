@@ -116,3 +116,6 @@ Contact & next steps
 - For any security or high-severity blocking issues, tag the on-call security engineer and open a remediation PR.
 - For performance investigations, capture flamegraphs for slow handlers, and run targeted EventBus handler profiling.
 - For test flakiness, isolate failing suites (integration vs unit) and set focused PRs to restore passing CI.
+
+## License
+This documentation and the FBA-Bench Core repository are distributed under the MIT License. See [LICENSE](../LICENSE).

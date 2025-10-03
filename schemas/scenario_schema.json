@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fba-bench.org/schemas/scenario_schema.json",
+  "title": "FBA-Bench Scenario Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "tier", "inputs", "constraints", "evaluation"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable scenario identifier (lowercase letters, numbers, underscores)."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable scenario name."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional description of the scenario (<=500 chars)."
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2,
+      "description": "Difficulty tier: 0 (baseline), 1 (moderate), 2 (advanced)."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Arbitrary input parameters for the scenario. Kept flexible for compatibility.",
+      "additionalProperties": true
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Optional scenario constraints.",
+      "additionalProperties": false,
+      "properties": {
+        "time_limit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "budget_limit": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "description": "Evaluation configuration and thresholds.",
+      "additionalProperties": false,
+      "required": ["metrics", "thresholds"],
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["trust", "operations", "finance", "marketing", "stress"]
+          },
+          "description": "List of evaluation metric categories."
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pass", "excellent"],
+          "properties": {
+            "pass": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "excellent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "description": "Score thresholds (0–100)."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the scenario definition.",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "author": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

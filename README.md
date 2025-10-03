@@ -1,5 +1,52 @@
 # FBA-Bench Core — Trust Dossier
 
+## Requirements
+
+- Python: 3.9+ (tested on 3.9–3.12)
+- Supported OS: Windows 10/11, macOS 12+ (Intel/Apple Silicon), Linux (x86_64/arm64) with Python 3.9+ available
+- Tools:
+  - Git
+  - Optional: Docker 24+ and Docker Compose v2
+  - Optional: VS Code + Dev Containers extension
+
+### Installation
+
+Create and activate a virtual environment:
+
+- macOS/Linux (bash/zsh):
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```
+- Windows PowerShell:
+  ```powershell
+  py -3 -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  ```
+- Windows CMD:
+  ```bat
+  py -3 -m venv .venv
+  .\.venv\Scripts\activate.bat
+  ```
+
+Install the package:
+
+- Minimal install:
+  ```bash
+  pip install -e .
+  ```
+- Developer tooling (tests, linting, formatting, etc.):
+  ```bash
+  pip install -e ".[dev]"
+  ```
+
+Verify the installation:
+```bash
+python -c "import fba_bench_core; print(fba_bench_core.__version__)"
+```
+
+For more detailed setup, see the Quickstart: [docs/quickstart.md](docs/quickstart.md)
+
 FBA-Bench Core is the public, source-available subset of the FBA-Bench project. It provides:
 - Reproducible benchmark scenarios (tiers 0–2)
 - A metrics suite and baseline agents
@@ -98,8 +145,8 @@ The Press Kit provides media resources for FBA-Bench Core, including logos, scre
   - Screenshots: screenshot-1.svg (Dashboard), screenshot-2.svg (Leaderboard) – placeholders
   - Guidelines: Basic usage rules on the press page (clear space, no alterations; subject to update)
 
-Usage: Follow the basic brand guidelines on the press page. Assets are placeholders and should be replaced with final brand assets before launch. For inquiries: press@example.com (placeholder).
 
+Usage: Follow the basic brand guidelines on the press page. Assets are placeholders and should be replaced with final brand assets before launch. For inquiries: press@fba-bench.ai.
 ## Contributing
 Contributions are welcome for the public core:
 - Propose changes to scenarios, metrics, or documentation.
@@ -143,10 +190,10 @@ The page renders a semantic table with columns: Rank (auto-computed), Team/Model
   Visit `http://localhost:8000/leaderboard.html`.
 
 ### CTAs Configuration
-- Homepage CTAs are in `site/index.html`. The prominent CTA section features a headline ("Ready to Benchmark Your AI Agents?"), subtext ("Join the leading standard for e-commerce AI evaluation with reproducible scenarios and trusted metrics."), primary "Get Started" button linking to `./leaderboard.html`, and secondary "Contact" link to `mailto:press@example.com`.
+- Homepage CTAs are in `site/index.html`. The prominent CTA section features a headline ("Ready to Benchmark Your AI Agents?"), subtext ("Join the leading standard for e-commerce AI evaluation with reproducible scenarios and trusted metrics."), primary "Get Started" button linking to `./leaderboard.html`, and secondary "Contact" link to `mailto:press@fba-bench.ai`.
 - Press page CTAs are in `site/press.html`:
   - "See benchmark results" currently anchors to `#results` (update to `leaderboard.html` when available).
-  - "Request enterprise demo" links to `mailto:press@fba-bench.example` (placeholder; replace with real endpoint).
+  - "Request enterprise demo" links to `mailto:press@fba-bench.ai` (placeholder; replace with real endpoint).
   - "Read the paper" points to `research.html` (label as "coming soon" until Step 2 adds it).
 - Edit the `<a>` tags directly in the HTML files to update destinations.
 
@@ -203,7 +250,7 @@ window.ANALYTICS_CONFIG = {
 - All tracking is opt-in via configuration; no user data is sent externally without explicit setup.
 
 ## License
-This repository is distributed under a source-available license (placeholder). See LICENSE.
+This repository is distributed under the MIT License. See LICENSE.
 
 ## Research
 Explore FBA Bench research outputs, including white papers in `docs/paper/`. Propose contributions via GitHub issues or PRs following guidelines in `docs/paper/README.md`.
@@ -213,13 +260,16 @@ Explore FBA Bench research outputs, including white papers in `docs/paper/`. Pro
 - Citation metadata: [CITATION.cff](CITATION.cff)
 
 Short BibTeX example for citing FBA Bench:
+
+Note: "ARXIV_ID" is a placeholder. See docs/paper/README.md for the update procedure once the real arXiv ID is available.
+
 ```
 @misc{fba_bench_2025,
   title={FBA Bench: Benchmark for AI Agents in Financial Business Automation},
   author={Doe, John and Smith, Jane and Johnson, Alex},
   year={2025},
   publisher={arXiv},
-  note={Placeholder: arXiv:2509.XXXXX [cs.AI]},
-  url={https://github.com/OWNER/REPO}
+  note={ARXIV_ID [cs.AI]},
+  url={}
 }
 ```

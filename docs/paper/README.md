@@ -30,7 +30,7 @@ Use Markdown for drafts; convert to LaTeX/PDF for submission. Ensure reproducibi
 3. Update `site/research.html` in the "Papers" section:
    - Add a new entry with title, authors (e.g., "John Doe, Jane Smith"), venue/year (e.g., "arXiv 2025").
    - Include a short abstract blurb.
-   - Add links: PDF (`../docs/paper/YYYY-paper-shortname/paper.pdf`), DOI (placeholder like "10.48550/arXiv.2509.XXXXX"), BibTeX (anchor to reveal the block, e.g., `<details><summary>BibTeX</summary><pre>@inproceedings{...}</pre></details>`).
+   - Add links: PDF (`../docs/paper/YYYY-paper-shortname/paper.pdf`), DOI (placeholder like "10.48550/arXiv.ARXIV_ID"), BibTeX (anchor to reveal the block, e.g., `<details><summary>BibTeX</summary><pre>@inproceedings{...}</pre></details>`).
 4. Commit and PR as per contribution flow.
 
 ## Guidance on Content
@@ -38,7 +38,7 @@ Use Markdown for drafts; convert to LaTeX/PDF for submission. Ensure reproducibi
 - **Abstract**: 150-250 words summarizing motivation, methods, results, and implications. Keep it self-contained.
 - **Links**:
   - PDF: Relative path to the file in `docs/paper/`.
-  - DOI: Use arXiv or publisher DOI; placeholder format "10.48550/arXiv.2509.XXXXX".
+  - DOI: Use arXiv or publisher DOI; placeholder format "10.48550/arXiv.ARXIV_ID".
   - BibTeX: Preformatted block in `<pre>`; use `@inproceedings`, `@misc`, or `@techreport` types.
 
 ## Contribution Flow
@@ -68,7 +68,7 @@ Matching the Research page citation for the core FBA Bench:
   author={Doe, John and Smith, Jane and Johnson, Alex},
   year={2025},
   publisher={arXiv},
-  note={Placeholder: arXiv:2509.XXXXX [cs.AI]}
+  note={ARXIV_ID [cs.AI]}
 }
 ```
 
@@ -89,3 +89,26 @@ John Doe^1^, Jane Smith^2^
 ```
 
 Update placeholders post-publication. Validate with tools like JabRef. Sync across research.html, this README, and CITATION.cff to avoid inconsistencies.
+
+## Updating the arXiv ID (Blocked until assignment)
+The repository uses the literal token "ARXIV_ID" in citation snippets and links until the real arXiv ID is issued. When the ID is available (e.g., 2501.01234), update all references in a single change:
+- POSIX (macOS/Linux):
+  ```
+  git grep -l 'ARXIV_ID' | xargs -I{} sed -i'' -e 's/ARXIV_ID/2501.01234/g' {}
+  ```
+- Windows PowerShell:
+  ```
+  git grep -l 'ARXIV_ID' | % { (Get-Content $_) -replace 'ARXIV_ID','2501.01234' | Set-Content $_ }
+  ```
+Scope to check after replacement:
+- [`CITATION.cff`](../CITATION.cff)
+- [`README.md`](../README.md)
+- [`docs/paper/README.md`](README.md)
+- [`site/research.html`](../site/research.html)
+Validation:
+- Verify there are no instances of "ARXIV_ID" left:
+  ```
+  git grep -n 'ARXIV_ID' || echo 'No ARXIV_ID placeholders remain'
+  ```
+Status:
+- BLOCKED until a real arXiv identifier is provided.

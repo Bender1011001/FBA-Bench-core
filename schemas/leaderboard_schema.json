@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fba-bench.org/schemas/leaderboard_schema.json",
+  "title": "FBA-Bench Leaderboard",
+  "anyOf": [
+    {
+      "type": "array",
+      "items": { "$ref": "#/definitions/entry" }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entry" }
+        }
+      },
+      "required": ["entries"],
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["team", "model", "score", "date"],
+      "properties": {
+        "team": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "date": { "type": "string", "format": "date" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "url": { "type": "string", "format": "uri" },
+        "tier": { "type": "integer", "minimum": 0, "maximum": 2 }
+      }
+    }
+  }
+}

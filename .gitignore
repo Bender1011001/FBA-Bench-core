@@ -1,28 +1,48 @@
 # Python
-__pycache__/
 *.py[cod]
 *.pyo
 *.egg-info/
 *.egg
 .eggs/
-dist/
-build/
 .build/
 .cache/
-.pytest_cache/
-.coverage
 coverage.xml
-htmlcov/
 
 # Environments
 .venv/
 venv/
+
+# Environment files (ignore real env; allow template)
 .env
 .env.*
+!.env.example
 
-# IDE/OS
+# Standard ignore patterns (secrets, builds, IDE, OS)
+
+# Secrets
+secrets/
+*.key
+*.pem
+credentials.json
+
+# Build artifacts
+dist/
+build/
+
+# Python caches/tests
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+# (already handled in Environments section above)
+
+# IDE/editor
 .vscode/
 .idea/
+
+# OS cruft
 .DS_Store
 Thumbs.db
 

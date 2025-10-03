@@ -1,12 +1,19 @@
 (function() {
+  'use strict';
+
+  // Global configuration for FBA Bench site
+  // Development defaults are intentionally safe and analytics-disabled.
+  // Values can be overridden at build time via scripts/inject-config.sh using the @inject markers below.
+
   if (typeof window !== 'undefined') {
-    window.ANALYTICS_CONFIG = {
-      enabled: false,
-      provider: "placeholder",           // e.g., "plausible" or "custom"
-      trackingId: "",                    // empty by default
-      respectDNT: true,                  // respect Do Not Track
-      sampleRate: 1.0,                   // 0–1.0; keep 1.0 default
-      endpoint: ""                       // optional local or external endpoint (empty by default)
+    window.FBABenchConfig = {
+      analytics: {
+        enabled: false, // @inject ANALYTICS_ENABLED (bool)
+        trackingId: '', // @inject ANALYTICS_TRACKING_ID (string)
+        endpoint: '', // @inject ANALYTICS_ENDPOINT (string URL)
+        respectDNT: true // @inject ANALYTICS_RESPECT_DNT (bool)
+      },
+      environment: 'development' // @inject ENVIRONMENT (string)
     };
   }
 })();

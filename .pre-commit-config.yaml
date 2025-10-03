@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: detect-secrets (with baseline)
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: |
+          (?x)^(
+            site/assets/press/press-kit\.zip|
+            site/assets/.*\.(png|svg|jpg|jpeg|gif|zip)$|
+            golden_masters/.*|
+            .*\.lock$|
+            .*\.min\.js$
+          )$
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: check-added-large-files
+        args: ["--maxkb=5000"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
