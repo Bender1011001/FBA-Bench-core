@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Leaderboard | FBA Bench</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/press/logo.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="assets/press/logo.png">
+  <meta name="theme-color" content="#0b0e14">
+  <meta name="description" content="Public leaderboard showcasing FBA-Bench benchmark results and contributions.">
+  <meta property="og:title" content="Leaderboard | FBA Bench">
+  <meta property="og:description" content="Public leaderboard showcasing FBA-Bench benchmark results and contributions.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/press/og-image.png">
+  <meta property="og:site_name" content="FBA-Bench">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Leaderboard | FBA Bench">
+  <meta name="twitter:description" content="Public leaderboard showcasing FBA-Bench benchmark results and contributions.">
+  <meta name="twitter:image" content="assets/press/og-image.png">
+  <style>
+    :root { --bg:#0b0e14; --fg:#e6e6e6; --muted:#a8b0bd; --accent:#61dafb; --card:#121722; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:40px 20px; text-align:center; background:linear-gradient(135deg, #121722, #0b0e14); border-bottom:1px solid #1f2530; }
+    nav { margin-bottom: 20px; }
+    nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; gap: 20px; }
+    nav a { color: var(--accent); text-decoration: none; padding: 10px; }
+    nav a:hover, nav .active { text-decoration: underline; }
+    h1 { margin:0 0 10px; font-size:32px; }
+    main { max-width:940px; margin:30px auto; padding:0 16px 60px; }
+    section { background:var(--card); border:1px solid #1f2530; border-radius:10px; padding:20px; margin-bottom:18px; }
+    h2 { margin-top:0; font-size:22px; }
+    table { width:100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #1f2530; }
+    th { background: #1f2530; font-weight: bold; }
+    tr:hover { background: rgba(97, 218, 251, 0.05); }
+    .loading, .error, .empty { text-align: center; padding: 40px; color: var(--muted); }
+    .error { color: #ff6b6b; }
+    table caption { font-weight: bold; margin-bottom: 10px; }
+    .table-wrapper { overflow-x: auto; }
+    .tabs { display:flex; gap:8px; justify-content:center; margin:10px 0; flex-wrap:wrap; }
+    .tabs a { padding:8px 12px; border:1px solid #1f2530; border-radius:999px; color:var(--accent); text-decoration:none; background:#0e1320; }
+    .tabs a.active { background: var(--accent); color: var(--bg); }
+    footer { text-align:center; color:var(--muted); padding:20px; border-top:1px solid #1f2530; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="press.html">Press</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+      </ul>
+    </nav>
+    <h1>Leaderboard</h1>
+  </header>
+  <main>
+    <section>
+      <p>This is a public, opt-in scoreboard showcasing benchmark results and contributions from the FBA-Bench community. Teams can submit their agent performance for ranking.</p>
+      <div class="tabs" id="tier-tabs" role="tablist" aria-label="Leaderboard tiers">
+        <a href="?tier=0" role="tab" data-tier="0" aria-selected="false">Tier 0</a>
+        <a href="?tier=1" role="tab" data-tier="1" aria-selected="true">Tier 1</a>
+        <a href="?tier=2" role="tab" data-tier="2" aria-selected="false">Tier 2</a>
+      </div>
+      <div id="leaderboard-container">
+        <div class="loading">Loading leaderboard...</div>
+      </div>
+      <noscript><div class="error">JavaScript is required to view the leaderboard.</div></noscript>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2025 FBA-Bench Project. Source-available. See <a href="https://github.com/Bender1011001/FBA-Bench-core/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a>.</p>
+  </footer>
+  <script>
+    (function() {
+      'use strict';
+
+      function getTierFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get('tier');
+        const n = t !== null ? Number(t) : NaN;
+        return [0,1,2].includes(n) ? n : 1;
+      }
+
+      function setActiveTab(tier) {
+        const links = document.querySelectorAll('#tier-tabs a[data-tier]');
+        links.forEach(a => {
+          const isActive = Number(a.dataset.tier) === tier;
+          a.classList.toggle('active', isActive);
+          a.setAttribute('aria-selected', String(isActive));
+        });
+      }
+
+      async function fetchTierData(tier) {
+        const path = `./data/leaderboard_tier_${tier}.json`;
+        try {
+          const resp = await fetch(path, { cache: 'no-store' });
+          if (!resp.ok) throw new Error(`Failed to load ${path}`);
+          return await resp.json();
+        } catch (e) {
+          if (tier === 1) {
+            try {
+              const legacy = await fetch('./data/leaderboard.json', { cache: 'no-store' });
+              if (legacy.ok) return await legacy.json();
+            } catch (_) {}
+          }
+          throw e;
+        }
+      }
+
+      function renderTable(container, data) {
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = '<div class="empty">No entries yet. Be the first to contribute!</div>';
+          return;
+        }
+        data.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return new Date(b.date) - new Date(a.date);
+        });
+        const lastUpdated = data.reduce((max, e) => Math.max(max, +new Date(e.date)), 0);
+        const lastUpdatedStr = new Date(lastUpdated).toISOString().slice(0,10);
+
+        let tableHTML = `
+          <div class="leaderboard-meta" style="display:flex; justify-content: space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span>Total entries: ${data.length}</span>
+            <span>Last updated: ${lastUpdatedStr}</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <caption>Leaderboard of AI Agent Performance on FBA-Bench</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Rank</th>
+                  <th scope="col">Team/Model</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Notes</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        data.forEach((entry, index) => {
+          const rank = index + 1;
+          const teamModel = `${entry.team} / ${entry.model}`;
+          const notes = entry.notes || 'N/A';
+          tableHTML += `
+            <tr>
+              <td>${rank}</td>
+              <td>${teamModel}</td>
+              <td>${Number(entry.score).toFixed(1)}</td>
+              <td>${entry.date}</td>
+              <td>${notes}</td>
+            </tr>`;
+        });
+        tableHTML += '</tbody></table></div>';
+        container.innerHTML = tableHTML;
+      }
+
+      async function loadAndRender(tier, pushStateUpdate) {
+        const container = document.getElementById('leaderboard-container');
+        container.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+        setActiveTab(tier);
+        try {
+          const data = await fetchTierData(tier);
+          renderTable(container, data);
+          const sourcePath = `data/leaderboard_tier_${tier}.json`;
+          const info = document.createElement('p');
+          info.style.marginTop = '10px';
+          info.style.color = 'var(--muted)';
+          info.innerHTML = `Data source: <a href="${sourcePath}">${sourcePath}</a>. To submit results, open an issue or PR.`;
+          container.appendChild(info);
+        } catch (error) {
+          container.innerHTML = `<div class="error">Unable to load leaderboard data. Please check back later or contact support. (Error: ${error.message})</div><p>Note: If viewing locally, some browsers restrict fetch from file:// paths. Use a simple static server (e.g., python -m http.server).</p>`;
+        }
+        if (pushStateUpdate) {
+          history.pushState({ tier }, '', `?tier=${tier}`);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const initialTier = getTierFromURL();
+        loadAndRender(initialTier, false);
+
+        const tabs = document.getElementById('tier-tabs');
+        if (tabs) {
+          tabs.addEventListener('click', function(e) {
+            const a = e.target.closest('a[data-tier]');
+            if (!a) return;
+            e.preventDefault();
+            const tier = Number(a.dataset.tier);
+            if (Number.isNaN(tier)) return;
+            loadAndRender(tier, true);
+          });
+        }
+
+        window.addEventListener('popstate', function(ev) {
+          const tier = ev.state && typeof ev.state.tier === 'number' ? ev.state.tier : getTierFromURL();
+          loadAndRender(tier, false);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
