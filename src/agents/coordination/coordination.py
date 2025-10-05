@@ -7,19 +7,27 @@ and alignment validation for agent actions.
 
 import asyncio
 import logging
-from typing import List, Dict, Any, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from money import Money
 
-from .models import (
-    BusinessPriority,
-    StrategicObjective,
-    BusinessState,
-    StrategicDecision,
-)
-from datetime import datetime
 from agents.skill_modules.base_skill import SkillAction
 
+if TYPE_CHECKING:
+    # These imports are only required for type checking and to document expected types.
+    # Keeping them inside a TYPE_CHECKING guard avoids runtime unused-import lint issues
+    # while still making the types available to static analyzers.
+    from agents.base import Agent  # type: ignore
+    from agents.skill_modules.registry import SkillRegistry  # type: ignore
+    from agents.skill_modules.base_skill import SkillModule  # type: ignore
+
+from .models import (
+    BusinessPriority,
+    BusinessState,
+    StrategicDecision,
+    StrategicObjective,
+)
 
 logger = logging.getLogger(__name__)
 

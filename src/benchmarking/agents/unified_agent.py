@@ -1034,13 +1034,14 @@ class AgentFactory:
 
             if agent_type in ("llm", "baseline"):
                 # Build LLM-based baseline bots using shared dependencies
+                from llm_interface.openrouter_client import OpenRouterClient
+                from llm_interface.prompt_adapter import PromptAdapter
+                from llm_interface.response_parser import LLMResponseParser
+
                 from baseline_bots.claude_sonnet_bot import ClaudeSonnetBot
                 from baseline_bots.gpt_3_5_bot import GPT35Bot
                 from baseline_bots.gpt_4o_mini_bot import GPT4oMiniBot
                 from baseline_bots.grok_4_bot import Grok4Bot
-                from llm_interface.openrouter_client import OpenRouterClient
-                from llm_interface.prompt_adapter import PromptAdapter
-                from llm_interface.response_parser import LLMResponseParser
 
                 # Check if services module is available
                 if services is None:
@@ -1065,8 +1066,9 @@ class AgentFactory:
                 max_tokens = (config.llm_config or {}).get("max_tokens", 1000)
                 top_p = (config.llm_config or {}).get("top_p", 1.0)
 
-                from llm_interface.config import LLMConfig
                 import os
+
+                from llm_interface.config import LLMConfig
 
                 llm_cfg = LLMConfig(
                     provider="openrouter",

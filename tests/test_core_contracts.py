@@ -1,8 +1,9 @@
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from pydantic import ValidationError
 
-from fba_bench_core.domain.events import SaleOccurred, AdjustPriceCommand
+from fba_bench_core.domain.events import AdjustPriceCommand, SaleOccurred
 
 # Try to import Product from domain.models, fall back to legacy models.product shim if needed.
 try:

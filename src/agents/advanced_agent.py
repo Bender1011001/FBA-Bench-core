@@ -30,10 +30,10 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from config.model_config import get_model_params
-
 # Core runner protocol types (canonical for DIY agents)
 from fba_bench.core.types import SimulationState, ToolCall
+
+from config.model_config import get_model_params
 
 
 # Backwards-compat lightweight AgentConfig expected by some tests

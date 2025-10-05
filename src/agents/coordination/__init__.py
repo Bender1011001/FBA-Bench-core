@@ -11,23 +11,20 @@ from typing import Any, Dict, List, Tuple
 
 from money import Money
 
-from ..skills import SkillCoordinator
+from agents.skill_modules.base_skill import SkillAction
 
+from ..skills import SkillCoordinator
+from .coordination import CoordinationManager
+from .crisis import CrisisManager
 from .models import (
     BusinessPriority,
-    StrategicObjective,
     BusinessState,
     ResourceAllocationPlan,
     StrategicDecision,
+    StrategicObjective,
 )
-
-from .coordination import CoordinationManager
-from .resources import ResourceManager
-from .crisis import CrisisManager
 from .performance import PerformanceManager
-
-from agents.skill_modules.base_skill import SkillAction
-
+from .resources import ResourceManager
 
 logger = logging.getLogger(__name__)
 

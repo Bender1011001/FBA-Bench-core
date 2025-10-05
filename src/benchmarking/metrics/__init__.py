@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 # Export helpers for function-style metrics
+from .registry import metrics_registry  # legacy class-based registry
 from .registry import (
     get_metric,
     list_metrics,
-    metrics_registry,  # legacy class-based registry
     register_metric,
 )
 

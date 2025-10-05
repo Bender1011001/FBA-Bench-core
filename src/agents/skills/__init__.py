@@ -9,28 +9,27 @@ concurrent execution of multiple skills with performance tracking.
 import asyncio
 import logging
 from collections import defaultdict
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from datetime import datetime
-
-from fba_bench_core.event_bus import EventBus
 from fba_events.base import BaseEvent
 from money import Money
 
+from fba_bench_core.event_bus import EventBus
+
+from ..skill_modules.base_skill import BaseSkill, SkillAction
+from .conflicts import ConflictResolver
+from .dispatch import DispatchManager
+from .metrics import MetricsTracker
 from .models import (
     CoordinationStrategy,
-    SkillSubscription,
-    ResourceAllocation,
     CoordinatorTuning,
+    ResourceAllocation,
     SkillPerformanceMetrics,
+    SkillSubscription,
 )
-from .dispatch import DispatchManager
 from .resources import ResourceManager
-from .metrics import MetricsTracker
-from .conflicts import ConflictResolver
 from .utils import get_max_concurrent_events, log_coordination_decision
-from ..skill_modules.base_skill import BaseSkill, SkillAction
-
 
 logger = logging.getLogger(__name__)
 

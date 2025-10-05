@@ -1,14 +1,18 @@
 import pytest
 
-from benchmarking.validators import (
-    determinism_check,  # noqa: F401
-    fairness_balance,  # noqa: F401
-    outlier_detection,  # noqa: F401
-    reproducibility_metadata,  # noqa: F401
-    schema_adherence,  # noqa: F401
-    structural_consistency,  # noqa: F401 (auto-registers)
+from benchmarking.validators import determinism_check  # noqa: F401
+from benchmarking.validators import fairness_balance  # noqa: F401
+from benchmarking.validators import outlier_detection  # noqa: F401
+from benchmarking.validators import reproducibility_metadata  # noqa: F401
+from benchmarking.validators import schema_adherence  # noqa: F401
+from benchmarking.validators import (  # noqa: F401 (auto-registers)
+    structural_consistency,
 )
-from benchmarking.validators.registry import get_validator, list_validators, register_validator
+from benchmarking.validators.registry import (
+    get_validator,
+    list_validators,
+    register_validator,
+)
 
 
 def test_registry_register_and_get_and_list():

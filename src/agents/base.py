@@ -1,8 +1,8 @@
+import importlib
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
 from src.fba_events.base import EventBus
-import importlib
 
 
 def get_registry():

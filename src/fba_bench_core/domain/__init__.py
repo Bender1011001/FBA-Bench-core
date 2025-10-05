@@ -3,16 +3,16 @@
 Exposes the primary domain models and Pydantic contracts for external import.
 """
 
-from .models import Product, Competitor
 from .events import (
+    AdjustPriceCommand,
+    AnyCommand,
     BaseEvent,
+    Command,
+    PlaceOrderCommand,
     SaleOccurred,
     StockUpdated,
-    Command,
-    AdjustPriceCommand,
-    PlaceOrderCommand,
-    AnyCommand,
 )
+from .models import Competitor, Product
 
 __all__ = [
     "Product",

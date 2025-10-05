@@ -6,8 +6,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from agents.skill_modules.base_skill import (
+    SkillAction,  # Assuming base_skill defines SkillAction
+)
 from fba_bench_core.event_bus import EventBus
-from agents.skill_modules.base_skill import SkillAction  # Assuming base_skill defines SkillAction
 
 logger = logging.getLogger(__name__)
 

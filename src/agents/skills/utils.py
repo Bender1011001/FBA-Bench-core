@@ -2,16 +2,13 @@
 Utility functions for skill coordination.
 """
 
+from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
-from datetime import datetime
-
+from fba_events.base import BaseEvent
 from money import Money
 
 from ..skill_modules.base_skill import SkillAction
-
-from fba_events.base import BaseEvent
-
 from .models import CoordinatorTuning
 
 

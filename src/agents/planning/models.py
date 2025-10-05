@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+
 class PlanPriority(Enum):
     """Priority levels for strategic and tactical plans."""
 

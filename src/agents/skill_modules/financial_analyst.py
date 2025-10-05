@@ -14,11 +14,12 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from config.model_config import get_model_params
 from fba_events.base import BaseEvent
 from fba_events.sales import SaleOccurred
 from fba_events.time_events import TickEvent
 from money import Money
+
+from config.model_config import get_model_params
 
 from .base_skill import BaseSkill, SkillAction, SkillContext
 

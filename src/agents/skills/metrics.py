@@ -2,12 +2,13 @@
 Performance metrics tracking for skill coordination.
 """
 
-from typing import Any, Dict, List, Tuple
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
-from .models import SkillPerformanceMetrics, ResourceAllocation
-from ..skill_modules.base_skill import SkillAction
 from fba_events.base import BaseEvent
+
+from ..skill_modules.base_skill import SkillAction
+from .models import ResourceAllocation, SkillPerformanceMetrics
 
 
 class MetricsTracker:

@@ -5,10 +5,11 @@ Pydantic models for benchmark results, experiments, and configurations.
 Used in test_engine_new_api.py and benchmarking workflows.
 """
 
-from enum import Enum
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List
+
+from pydantic import BaseModel, Field
 
 
 class MetricsAggregationMode(Enum):

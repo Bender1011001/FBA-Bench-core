@@ -359,7 +359,9 @@ class IntegrationManager:
                     from memory_experiments.dual_memory_manager import (
                         DualMemoryManager as _DMM,  # type: ignore
                     )
-                    from memory_experiments.memory_config import MemoryConfig as _MC  # type: ignore
+                    from memory_experiments.memory_config import (
+                        MemoryConfig as _MC,  # type: ignore
+                    )
 
                     dmm, mc = _DMM, _MC
                     globals()["DualMemoryManager"] = dmm

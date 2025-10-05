@@ -1,6 +1,11 @@
-"""Phase 2 placeholder for the fba_bench_core.agents package.
+"""Package exports for fba_bench_core.agents.
 
-This package will contain agent implementations in later phases.
+Exports the BaseAgent abstract class and exposes the registry module to allow
+external code to discover and register agent implementations.
 """
+from __future__ import annotations
 
-__all__ = []
+from . import registry
+from .base import BaseAgent
+
+__all__ = ["BaseAgent", "registry"]

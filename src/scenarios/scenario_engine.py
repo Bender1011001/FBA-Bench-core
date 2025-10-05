@@ -7,10 +7,10 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 import yaml
-
 from instrumentation.clearml_tracking import ClearMLTracker
-from scenarios.scenario_framework import ScenarioConfig
 from services.world_store import get_world_store
+
+from scenarios.scenario_framework import ScenarioConfig
 
 
 class ScenarioType(str, Enum):

@@ -9,10 +9,11 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List
 
+from money import Money  # Assuming Money class is available
+
 from benchmarking.agents.base import BaseAgent
 from benchmarking.core.results import AgentRunResult
 from benchmarking.scenarios.base import BaseScenario, ScenarioConfig
-from money import Money  # Assuming Money class is available
 
 logger = logging.getLogger(__name__)
 

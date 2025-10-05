@@ -14,7 +14,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 from ..agents.base import BaseAgent  # Scenarios interact with agents
-from ..core.results import AgentRunResult, MetricResult  # Scenarios produce AgentRunResults
+from ..core.results import (  # Scenarios produce AgentRunResults
+    AgentRunResult,
+    MetricResult,
+)
 
 
 @dataclass

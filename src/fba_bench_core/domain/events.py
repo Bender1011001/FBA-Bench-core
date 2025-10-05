@@ -8,7 +8,7 @@ Field validators and model_config applied where appropriate.
 from datetime import datetime
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # ---------------------------------------------------------------------------
 # Base event and concrete event definitions

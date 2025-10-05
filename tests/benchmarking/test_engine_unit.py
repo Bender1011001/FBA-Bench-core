@@ -4,7 +4,13 @@ import pytest
 from pydantic import ValidationError
 
 # Import new engine API and models
-from benchmarking.core.engine import Engine, EngineConfig, EngineReport, RunnerSpec, ScenarioSpec
+from benchmarking.core.engine import (
+    Engine,
+    EngineConfig,
+    EngineReport,
+    RunnerSpec,
+    ScenarioSpec,
+)
 from benchmarking.scenarios.registry import scenario_registry
 
 

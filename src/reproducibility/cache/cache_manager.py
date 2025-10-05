@@ -7,11 +7,10 @@ and retrieving computational results with configurable policies.
 
 import hashlib
 import json
+import pickle
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
-
-import pickle
 
 
 class CacheManager:

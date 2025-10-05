@@ -18,11 +18,12 @@ import logging
 from math import floor
 from typing import Any, Dict, List, Optional
 
-# WorldStore global accessor (read-only usage for catalog)
-from fba_bench_core.services.world_store import get_world_store
 from fba_events.base import BaseEvent
 from fba_events.time_events import TickEvent
 from money import Money
+
+# WorldStore global accessor (read-only usage for catalog)
+from fba_bench_core.services.world_store import get_world_store
 
 from .base_skill import BaseSkill, SkillAction, SkillContext
 

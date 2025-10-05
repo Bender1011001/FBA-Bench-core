@@ -15,8 +15,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-from fba_bench_core.event_bus import EventBus
 from fba_events import BaseEvent
+
+from fba_bench_core.event_bus import EventBus
 
 logger = logging.getLogger(__name__)
 

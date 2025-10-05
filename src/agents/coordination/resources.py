@@ -5,12 +5,11 @@ Handles budget allocation, priority multipliers, and resource validation for age
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from money import Money
 
-from .models import ResourceAllocationPlan, BusinessPriority
-
+from .models import BusinessPriority, ResourceAllocationPlan
 
 logger = logging.getLogger(__name__)
 

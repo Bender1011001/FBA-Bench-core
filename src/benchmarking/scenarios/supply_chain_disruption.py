@@ -9,6 +9,8 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from fba_events.supplier import PlaceOrderCommand
+from money import Money
 from pydantic import Field, PositiveInt, confloat
 
 from benchmarking.agents.base import BaseAgent
@@ -17,8 +19,6 @@ from benchmarking.scenarios.base import BaseScenario, ScenarioConfig
 from fba_bench_core.services.market_simulator import MarketSimulationService
 from fba_bench_core.services.supply_chain_service import SupplyChainService
 from fba_bench_core.services.world_store import WorldStore
-from fba_events.supplier import PlaceOrderCommand
-from money import Money
 
 logger = logging.getLogger(__name__)
 

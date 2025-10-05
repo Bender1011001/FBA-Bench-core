@@ -3,9 +3,8 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-
 from types import SimpleNamespace
+from typing import Any, Dict, List, Optional
 
 from .models import (
     PlanPriority,
@@ -14,7 +13,6 @@ from .models import (
     StrategicObjective,
     TacticalAction,
 )
-
 
 logger = logging.getLogger(__name__)
 

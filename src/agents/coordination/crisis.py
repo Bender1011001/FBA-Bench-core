@@ -9,10 +9,9 @@ import logging
 from datetime import datetime
 from typing import List
 
-from .models import BusinessPriority
-
 from agents.skill_modules.base_skill import SkillAction
 
+from .models import BusinessPriority
 
 logger = logging.getLogger(__name__)
 

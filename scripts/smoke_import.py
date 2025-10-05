@@ -18,28 +18,24 @@ def main() -> None:
             return False
         return True
 
-    # Core packages commonly used by tests and users
-    targets = [
-        "metrics",
-        "agents",
-        "baseline_bots",
-        "constraints",
-        "money",
-        "fba_bench_core",  # marker package
-        # Optional subsets if present in core stage:
-        "scenarios",
-        "benchmarking",
-        "models",
-        "config",
+    EXPECTED_IMPORTS = [
+        "fba_bench_core",
+        "fba_bench_core.agents",
+        "fba_bench_core.domain",
+        "fba_bench_core.domain.events",
+        "fba_bench_core.domain.models",
+        "fba_bench_core.scenarios",
+        "fba_bench_core.services",
+        "fba_bench_core.exceptions",
     ]
 
-    for t in targets:
+    for t in EXPECTED_IMPORTS:
         if not try_import(t):
             failures.append(t)
 
     if failures:
         raise SystemExit(f"Smoke import failures: {failures}")
-    print("All smoke imports succeeded.")
+    print("All core smoke imports succeeded.")
 
 if __name__ == "__main__":
     main()

@@ -78,7 +78,9 @@ try:  # pragma: no cover
 except Exception:  # pragma: no cover
     SalesService = None  # type: ignore
 try:  # pragma: no cover
-    from services.double_entry_ledger_service import DoubleEntryLedgerService  # type: ignore
+    from services.double_entry_ledger_service import (
+        DoubleEntryLedgerService,  # type: ignore
+    )
 except Exception:  # pragma: no cover
     DoubleEntryLedgerService = None  # type: ignore
 try:  # pragma: no cover
@@ -86,7 +88,9 @@ try:  # pragma: no cover
 except Exception:  # pragma: no cover
     BsrEngineV3Service = None  # type: ignore
 try:  # pragma: no cover
-    from services.customer_reputation_service import CustomerReputationService  # type: ignore
+    from services.customer_reputation_service import (
+        CustomerReputationService,  # type: ignore
+    )
 except Exception:  # pragma: no cover
     CustomerReputationService = None  # type: ignore
 try:  # pragma: no cover
@@ -166,7 +170,14 @@ class BenchmarkConfig:
         self.extra: Dict[str, Any] = {k: v for k, v in kwargs.items() if k not in handled}
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        """
+        Return a dict representation of the BenchmarkConfig.
+
+        Build the mapping programmatically and then update with self.extra to
+        avoid any static duplicate-key mapping literals that can trigger flake8
+        F601 in some code inspection scenarios.
+        """
+        result: Dict[str, Any] = {
             "name": self.name,
             "description": self.description,
             "max_duration": self.max_duration,
@@ -176,8 +187,10 @@ class BenchmarkConfig:
             "agents": self.agents,
             "metrics": self.metrics,
             "environment": self.environment,
-            **self.extra,
         }
+        # Merge extra fields; explicit update avoids duplicate literal keys in source
+        result.update(self.extra)
+        return result
 
 
 class RunStatus(str, _Enum):
@@ -282,7 +295,13 @@ except Exception:
     pass
 
 try:
-    from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+    from pydantic import (
+        BaseModel,
+        Field,
+        ValidationInfo,
+        field_validator,
+        model_validator,
+    )
 except Exception:  # pragma: no cover
     # pydantic is a dependency in pyproject; this guard avoids import-time crash in exotic envs
     raise
@@ -796,7 +815,9 @@ class Engine:
         """
         # Local import to avoid import cycles at module import time
         try:
-            from ..metrics.registry import get_metric as _get_fn_metric  # function-style registry
+            from ..metrics.registry import (
+                get_metric as _get_fn_metric,  # function-style registry
+            )
         except Exception:
             _get_fn_metric = None  # soft-fail; we still attempt legacy
 
@@ -867,7 +888,9 @@ class Engine:
         """
         # Local import to avoid import cycles
         try:
-            from ..validators.registry import get_validator as _get_fn_validator  # function-style
+            from ..validators.registry import (
+                get_validator as _get_fn_validator,  # function-style
+            )
         except Exception:
             _get_fn_validator = None
 

@@ -7,10 +7,10 @@ and lookup by name or type. Used in base.py for agent discovery.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Type, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 if TYPE_CHECKING:
-    from .base import BaseAgent, AgentConfig
+    from .base import AgentConfig, BaseAgent
 
 
 class AgentRegistry:

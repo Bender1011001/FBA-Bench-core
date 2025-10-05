@@ -447,13 +447,11 @@ validator_registry = ValidatorRegistry()
 # Auto-register built-in function-style validators on import
 # Import modules that call register_validator(...) at import-time.
 try:
-    from . import (
-        determinism_check,  # noqa: F401
-        fairness_balance,  # noqa: F401
-        outlier_detection,  # noqa: F401
-        reproducibility_metadata,  # noqa: F401
-        schema_adherence,  # noqa: F401
-        structural_consistency,  # noqa: F401
-    )
+    from . import determinism_check  # noqa: F401
+    from . import fairness_balance  # noqa: F401
+    from . import outlier_detection  # noqa: F401
+    from . import reproducibility_metadata  # noqa: F401
+    from . import schema_adherence  # noqa: F401
+    from . import structural_consistency  # noqa: F401
 except Exception as _e:
     logger.debug(f"Built-in validators import failed or partial: {_e}")
