@@ -1,6 +1,9 @@
-"""Phase 2 placeholder for the fba_bench_core.exceptions package.
+"""Public exports for fba_bench_core.exceptions.
 
-This package will contain custom exceptions in later phases.
+This package re-exports the base exception types to provide a small,
+stable public API for consumers.
 """
 
-__all__ = []
+from .base import FBABenchException, ConfigurationError, AgentError
+
+__all__ = ["FBABenchException", "ConfigurationError", "AgentError"]
