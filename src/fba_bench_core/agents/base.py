@@ -1,91 +1,83 @@
-"""Base agent abstractions for fba_bench_core (Phase 5).
+"""Typed BaseAgent for fba_bench_core.
 
-This module provides a small, well-documented abstract base class that
-concrete agent implementations should inherit from. The BaseAgent class
-encapsulates basic identity and configuration storage, and declares the
-asynchronous decision contract used by the simulation / scenario runner.
+Phase D change:
+- Replace legacy **kwargs configuration with a typed Pydantic configuration
+  object. Downstream implementations should subclass the provided config model
+  for specialized parameters.
 """
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Dict, List
 
+from fba_bench_core.config import BaseAgentConfig
 from fba_bench_core.domain.events import BaseEvent, Command
 
 
 class BaseAgent(ABC):
-    """Abstract base class for agents.
+    """Abstract base class for agents that receive a validated configuration.
 
-    Purpose:
-        Provide a stable, minimal interface that all agent implementations must
-        satisfy. The core responsibility is to convert observed domain events
-        into a sequence of domain Commands representing intended actions.
+    Rationale:
+        Using a typed configuration object prevents downstream implementations
+        from hiding untyped parameters behind `Any` and enables validation at
+        construction time. Implementations that require additional fields may
+        subclass `BaseAgentConfig` (see examples in the config module).
 
-    Responsibilities:
-        - Maintain an immutable agent identifier.
-        - Store agent configuration as a shallow copy to prevent external mutation.
-        - Expose an async `decide` method which must be implemented by subclasses.
+    Initialization:
+        The agent receives a single `config: BaseAgentConfig` argument. The
+        `agent_id` is expected to be present on that config and becomes the
+        agent's immutable identifier.
 
-    Usage:
-        Subclasses should implement the async `decide` coroutine. The simulation
-        harness will call `await agent.decide(events)` where `events` is a list
-        of BaseEvent instances ordered from oldest to newest.
+    Immutability:
+        The provided config model is frozen (Pydantic frozen model). The agent
+        stores the config object directly and exposes it via a read-only
+        property to avoid accidental mutation.
     """
 
-    def __init__(self, agent_id: str, **config: Any) -> None:
-        """Initialize the base agent.
+    def __init__(self, config: BaseAgentConfig) -> None:
+        """Initialize the base agent with a validated, typed configuration.
 
         Parameters:
-            agent_id: A unique identifier for the agent instance.
-            **config: Arbitrary keyword configuration parameters which are stored
-                      as a shallow copy on the agent.
+            config: An instance of BaseAgentConfig or a subclass thereof. The
+                    model is validated by Pydantic prior to construction.
 
         Notes:
-            The configuration is shallow-copied (dict(config)) to avoid accidental
-            external mutation of the agent's internal configuration mapping.
+            - Do not accept `**kwargs` here: typed configs are required.
+            - The agent keeps a reference to the provided config (which is
+              immutable/frozen). Use `agent.config.model_copy()` to obtain a
+              mutable copy if necessary.
         """
-        self._agent_id = agent_id
-        self._config: Dict[str, Any] = dict(config)
+        self._config = config
+        self._agent_id = config.agent_id
 
     @property
     def agent_id(self) -> str:
-        """Return the agent's unique identifier.
-
-        Returns:
-            A string identifier assigned at construction time.
-        """
+        """Return the agent's unique identifier (from config.agent_id)."""
         return self._agent_id
 
-    def get_config(self) -> Dict[str, Any]:
-        """Return a shallow copy of the agent configuration.
+    @property
+    def config(self) -> BaseAgentConfig:
+        """Return the typed configuration object for this agent.
+
+        The returned object is immutable (Pydantic frozen model). Downstream
+        code that needs to modify configuration should create a new instance
+        (e.g., via `model_copy(update={...})`).
+        """
+        return self._config
+
+    def get_config(self) -> Dict:
+        """Return a serializable shallow mapping of the configuration.
 
         Returns:
-            A shallow copy of the internal configuration mapping (Dict[str, Any]).
+            A dict produced by Pydantic's model_dump() representing the config.
         """
-        return dict(self._config)
+        return self._config.model_dump()
 
     @abstractmethod
     async def decide(self, events: List[BaseEvent]) -> List[Command]:
         """Decide on a list of Commands given observed domain events.
 
-        Implementations must be an async coroutine. The caller will await the
-        result. The decision method receives a list of BaseEvent instances that
-        represent recent or historical events ordered from oldest to newest.
-
-        Parameters:
-            events: A list of BaseEvent objects used as the information basis
-                    for forming decisions. Implementations should treat the
-                    provided list as read-only.
-
-        Returns:
-            A list of Command instances representing the agent's intended
-            actions. An empty list indicates no action.
-
-        Contract and responsibilities:
-            - Implementations should avoid blocking I/O; use await for any
-              asynchronous operations.
-            - Returned Commands should be valid domain Command instances as
-              defined in fba_bench_core.domain.events.
-            - The method must not mutate the `events` input.
+        Implementations must be async coroutines and must not mutate the
+        provided `events` list.
         """
         raise NotImplementedError

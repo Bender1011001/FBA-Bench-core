@@ -1,27 +1,79 @@
 """Domain package exports for fba_bench_core.
 
-Exposes the primary domain models and Pydantic contracts for external import.
+This module exposes the core domain contracts and the expanded event/command
+vocabulary introduced in Phase C.
 """
 
 from .events import (
-    AdjustPriceCommand,
-    AnyCommand,
+    # Base types
     BaseEvent,
     Command,
-    PlaceOrderCommand,
+    # Events
     SaleOccurred,
-    StockUpdated,
+    PriceChangedExternally,
+    DemandSpiked,
+    StockReplenished,
+    StockDepleted,
+    FulfillmentDelayed,
+    PromotionLaunched,
+    CustomerComplaintLogged,
+    ForecastUpdated,
+    AnomalyDetected,
+    AnyEvent,
+    # Commands
+    AdjustPriceCommand,
+    LaunchPromotionCommand,
+    PlaceReplenishmentOrderCommand,
+    TransferInventoryCommand,
+    UpdateSafetyStockCommand,
+    ResolveCustomerIssueCommand,
+    StartCustomerOutreachCommand,
+    ReforecastDemandCommand,
+    AdjustFulfillmentLatencyCommand,
+    AnyCommand,
+    # helpers
+    get_event_class_for_type,
+    get_command_class_for_type,
 )
-from .models import Competitor, Product
+from .models import (
+    Product,
+    InventorySnapshot,
+    CompetitorListing,
+    Competitor,
+    DemandProfile,
+)
 
 __all__ = [
+    # models
     "Product",
+    "InventorySnapshot",
+    "CompetitorListing",
     "Competitor",
+    "DemandProfile",
+    # events & commands
     "BaseEvent",
-    "SaleOccurred",
-    "StockUpdated",
     "Command",
+    "SaleOccurred",
+    "PriceChangedExternally",
+    "DemandSpiked",
+    "StockReplenished",
+    "StockDepleted",
+    "FulfillmentDelayed",
+    "PromotionLaunched",
+    "CustomerComplaintLogged",
+    "ForecastUpdated",
+    "AnomalyDetected",
+    "AnyEvent",
     "AdjustPriceCommand",
-    "PlaceOrderCommand",
+    "LaunchPromotionCommand",
+    "PlaceReplenishmentOrderCommand",
+    "TransferInventoryCommand",
+    "UpdateSafetyStockCommand",
+    "ResolveCustomerIssueCommand",
+    "StartCustomerOutreachCommand",
+    "ReforecastDemandCommand",
+    "AdjustFulfillmentLatencyCommand",
     "AnyCommand",
+    "get_event_class_for_type",
+    "get_command_class_for_type",
 ]

@@ -1,6 +1,10 @@
-"""Phase 2 placeholder for the fba_bench_core.services package.
+"""Exports for fba_bench_core.services package.
 
-This package will contain service implementations in later phases.
+Expose the BaseService class and its typed configuration model.
 """
+from __future__ import annotations
 
-__all__ = []
+from .base import BaseService
+from fba_bench_core.config import BaseServiceConfig
+
+__all__ = ["BaseService", "BaseServiceConfig"]

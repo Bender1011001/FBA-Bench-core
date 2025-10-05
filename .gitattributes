@@ -1,0 +1,36 @@
+# .gitattributes - enforce LF line endings for text files
+#
+# Normalize text files to LF
+* text=auto eol=lf
+
+# Python sources
+*.py text eol=lf
+*.pyi text eol=lf
+*.pyx text eol=lf
+
+# YAML / TOML / JSON / Markdown / plain text
+*.md text eol=lf
+*.markdown text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.rst text eol=lf
+
+# Preserve binary attributes for common binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+*.pdf binary
+
+# End of file

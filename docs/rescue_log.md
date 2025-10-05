@@ -95,3 +95,32 @@
   - Flake8: no remaining violations after fixes.
   - Mypy: successful type-check across 20 files.
   - Overall: All formatting, linting, and type-checking tools are clean and the repository is ready for commit and subsequent Phase 11.
+
+## 2025-10-05 – Phase G Documentation
+
+- Timestamp (UTC): 2025-10-05T16:37:26.857Z
+- Branch: rescue/core-rebuild
+- Action: Updated documentation to reflect the rebuilt, contract-first core.
+- Changes made:
+  - README.md overhauled to emphasize the contract-first core library,
+    provide Poetry quick-start, describe core modules (domain models,
+    events/commands, agent/service bases, typed configs), testing/quality
+    commands, and packaging/versioning workflow.
+  - New architecture note created: `docs/architecture/core-contracts.md`
+    (detailed domain model summaries, events/commands taxonomy, agent &
+    service base-class guidance, transaction flow, and references to tests).
+  - CHANGELOG.md acknowledged and guidance added for towncrier fragments
+    under `newsfragments/` (maintainers should create fragments and run
+    `towncrier build --yes` to populate releases).
+- Critical assets referenced:
+  - Core contracts: `src/fba_bench_core/domain/models.py` and
+    `src/fba_bench_core/domain/events.py` (canonical Pydantic v2 contracts).
+  - Typed configs: `src/fba_bench_core/config.py` (BaseAgentConfig,
+    BaseServiceConfig).
+  - Agent/service bases: `src/fba_bench_core/agents/base.py`,
+    `src/fba_bench_core/services/base.py`.
+- Notes:
+  - Documentation updates are intentionally content-only; no code, tests,
+    or CI were modified as part of Phase G.
+  - Phase H will execute tooling (towncrier changelog generation, CI-run to
+    validate formatting/linting/type-checking commands against the rebuilt core).

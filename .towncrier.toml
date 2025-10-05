@@ -1,0 +1,4 @@
+[tool.towncrier]
+package = "fba_bench_core"
+directory = "newsfragments"
+filename = "CHANGELOG.md"
