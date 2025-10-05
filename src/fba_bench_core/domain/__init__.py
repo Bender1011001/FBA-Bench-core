@@ -1,6 +1,27 @@
-"""Phase 2 placeholder for the fba_bench_core.domain package.
+"""Domain package exports for fba_bench_core.
 
-This package will contain domain models and events in later phases.
+Exposes the primary domain models and Pydantic contracts for external import.
 """
 
-__all__ = []
+from .models import Product, Competitor
+from .events import (
+    BaseEvent,
+    SaleOccurred,
+    StockUpdated,
+    Command,
+    AdjustPriceCommand,
+    PlaceOrderCommand,
+    AnyCommand,
+)
+
+__all__ = [
+    "Product",
+    "Competitor",
+    "BaseEvent",
+    "SaleOccurred",
+    "StockUpdated",
+    "Command",
+    "AdjustPriceCommand",
+    "PlaceOrderCommand",
+    "AnyCommand",
+]
