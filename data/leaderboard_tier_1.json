@@ -1,0 +1,30 @@
+[
+  {
+    "team": "FBA-Bench",
+    "model": "openai/gpt-5",
+    "score": 0.0,
+    "date": "2025-10-01",
+    "notes": "Tier 1 run via OpenRouter (pending real execution)"
+  },
+  {
+    "team": "FBA-Bench",
+    "model": "anthropic/claude-sonnet-4.5",
+    "score": 0.0,
+    "date": "2025-10-01",
+    "notes": "Tier 1 run via OpenRouter (pending real execution)"
+  },
+  {
+    "team": "FBA-Bench",
+    "model": "google/gemini-2.5-flash",
+    "score": 0.0,
+    "date": "2025-10-01",
+    "notes": "Tier 1 run via OpenRouter (pending real execution)"
+  },
+  {
+    "team": "FBA-Bench",
+    "model": "google/gemini-2.5-pro",
+    "score": 0.0,
+    "date": "2025-10-01",
+    "notes": "Tier 1 run via OpenRouter (pending real execution)"
+  }
+]

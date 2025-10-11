@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://Bender1011001.github.io/FBA-Bench-core/sitemap.xml

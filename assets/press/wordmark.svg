@@ -1,0 +1,5 @@
+<svg width="400" height="80" viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="80" fill="#e6e6e6"/>
+  <text x="200" y="55" font-family="system-ui, sans-serif" font-size="28" fill="#0b0e14" text-anchor="middle" font-weight="bold">FBA-Bench</text>
+  <text x="200" y="75" font-family="system-ui, sans-serif" font-size="12" fill="#61dafb" text-anchor="middle">AI Agent Benchmark for E-Commerce</text>
+</svg>
