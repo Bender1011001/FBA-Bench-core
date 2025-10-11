@@ -2,9 +2,10 @@
 
 from typing import Any
 
-from ..registry import register_metric
+from .registry import register_metric
 
 
+@register_metric("cost_efficiency")
 def cost_efficiency(run: dict[str, Any], config: dict[str, Any]) -> float:
     """Calculate cost efficiency."""
     output = run.get("output", {})
@@ -13,6 +14,3 @@ def cost_efficiency(run: dict[str, Any], config: dict[str, Any]) -> float:
     if cost == 0:
         return 0.0
     return score_value / cost
-
-
-register_metric("cost_efficiency", cost_efficiency)

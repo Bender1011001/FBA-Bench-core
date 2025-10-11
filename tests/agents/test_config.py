@@ -50,8 +50,8 @@ def test_base_agent_config_invalid_agent_id_and_negative_poll_and_nested_metadat
 
 def test_base_agent_config_immutability_and_model_copy():
     cfg = BaseAgentConfig(agent_id="agent_ok", poll_interval_seconds=10)
-    # frozen model should raise ValidationError on assignment
-    with pytest.raises(ValidationError):
+    # frozen model should raise AttributeError on assignment
+    with pytest.raises(AttributeError):
         cfg.agent_id = "new_id"
     # model_copy(update=...) returns a modified copy; original unchanged
     cfg2 = cfg.model_copy(update={"poll_interval_seconds": 60})
@@ -64,7 +64,7 @@ def test_base_service_config_happy_and_invalid_and_immutability():
     assert svc.service_id == "svc1"
     with pytest.raises(ValidationError):
         BaseServiceConfig(service_id="bad id")
-    with pytest.raises(ValidationError):
+    with pytest.raises(AttributeError):
         svc.service_id = "svc2"
     svc2 = svc.model_copy(update={"default_region": "us-west-2"})
     assert svc2.default_region == "us-west-2"
@@ -79,7 +79,7 @@ def test_subclass_agent_config_extendability():
     assert pac.pricing_tier == "pro"
     assert pac.agent_id == "pricing1"
     # frozen: assignment raises
-    with pytest.raises(ValidationError):
+    with pytest.raises(AttributeError):
         pac.pricing_tier = "basic"
     pac2 = pac.model_copy(update={"pricing_tier": "enterprise"})
     assert pac2.pricing_tier == "enterprise"

@@ -65,8 +65,8 @@ def test_product_invalid_decimal_string_for_money():
 
 def test_product_immutability_validate_assignment_and_model_copy():
     p = Product(product_id="p6", cost="1.00", price="2.00", stock=1)
-    # invalid direct assignment should raise ValidationError due to validate_assignment
-    with pytest.raises(ValidationError):
+    # invalid direct assignment should raise AttributeError due to frozen_instance
+    with pytest.raises(AttributeError):
         p.price = Decimal("-1.00")
     # valid model_copy update creates a new instance and original remains unchanged
     p2 = p.model_copy(update={"price": Decimal("3.00")})

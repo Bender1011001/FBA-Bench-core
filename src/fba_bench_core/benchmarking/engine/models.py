@@ -45,5 +45,18 @@ class EngineConfig(BaseModel):
         return v
 
 
+class RunReport(BaseModel):
+    status: str
+    output: Any = None
+    seed: int | None = None
+    metrics: dict[str, Any] = {}
+
+
+class ScenarioReport(BaseModel):
+    key: str
+    runs: list[RunReport] = []
+    aggregates: dict[str, Any] = {}
+
+
 class EngineReport(BaseModel):
-    scenario_reports: list[dict[str, Any]]
+    scenario_reports: list[ScenarioReport]

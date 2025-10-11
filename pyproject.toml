@@ -5,7 +5,7 @@ description = "Core interfaces, data models, and events for the FBA-Bench simula
 authors = ["FBA Team <devnull@example.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [{include = "fba_bench_core", from = "src"}]
+packages = [{ include = "fba_bench_core", from = "src" }]
 keywords = ["benchmarking", "simulation", "fba", "pydantic", "typing"]
 classifiers = [
   "Programming Language :: Python :: 3.11",
@@ -29,50 +29,72 @@ pydantic = "^2.0"
 pytest = "^8.0"
 pytest-asyncio = "^0.23.0"
 black = "^24.3.0"
-isort = "^5.12.0"
 flake8 = "^6.1.0"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
 poetry-dynamic-versioning = "^0.19.0"
 towncrier = "^21.0.0"
 bumpver = "^2023.1128"
+pip-audit = "^2.9.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+# --------------------
+# Dynamic versioning
+# --------------------
 [tool.poetry-dynamic-versioning]
-# Enable Git-tag driven dynamic versioning for reproducible SemVer releases.
 enable = true
 vcs = "git"
 fallback-version = "0.0.0"
 
+# --------------------
+# Towncrier changelog
+# --------------------
 [tool.towncrier]
-# towncrier will collect news fragments from `newsfragments/` and build CHANGELOG.md
 package = "fba_bench_core"
 directory = "newsfragments"
 filename = "CHANGELOG.md"
 
-[tool.isort]
-profile = "black"
-
+# --------------------
+# Ruff config (linter + import sorter + formatter)
+# --------------------
 [tool.ruff]
 target-version = "py311"
 line-length = 88
 src = ["src"]
+extend-exclude = ["tests/data", "build", "dist"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
-extend-select = ["UP"]
+select = ["E", "F", "UP"]
 ignore = ["E501"]
+fixable = ["ALL"]
+unfixable = []
 
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["fba_bench_core"]
+force-single-line = false
+
+# --------------------
+# Black config
+# --------------------
 [tool.black]
 line-length = 88
 target-version = ["py311"]
+skip-string-normalization = true
 
+# --------------------
+# Flake8 config
+# --------------------
 [tool.flake8]
 max-line-length = 88
+extend-ignore = ["E203", "W503"]
 
+# --------------------
+# Mypy config
+# --------------------
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
@@ -80,7 +102,11 @@ pretty = true
 warn_unused_ignores = true
 files = ["src/fba_bench_core", "tests"]
 
+# --------------------
+# Pytest config
+# --------------------
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra"
+addopts = "-ra --cov=src/fba_bench_core --cov-report=term-missing --cov-report=html"
 testpaths = ["tests"]
+asyncio_mode = "auto"

@@ -11,7 +11,7 @@ from .base import BaseScenario
 class MultiTurnToolUseConfig(BaseModel):
     """Configuration for multi-turn tool use scenario."""
 
-    steps: int = Field(gt=0, description="Number of steps")
+    steps: int = Field(default=5, gt=0, description="Number of steps")
     include_math: bool = Field(default=True, description="Include math operations")
     include_extraction: bool = Field(
         default=True, description="Include data extraction"

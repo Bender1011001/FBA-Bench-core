@@ -2,9 +2,10 @@
 
 from typing import Any
 
-from ..registry import register_metric
+from .registry import register_metric
 
 
+@register_metric("robustness")
 def robustness(run: dict[str, Any], config: dict[str, Any]) -> float:
     """Calculate robustness."""
     output = run.get("output", "")
@@ -14,6 +15,3 @@ def robustness(run: dict[str, Any], config: dict[str, Any]) -> float:
     if mode == "exact_casefold":
         return 1.0 if output.lower() == expected_signal.lower() else 0.0
     return 0.0
-
-
-register_metric("robustness", robustness)

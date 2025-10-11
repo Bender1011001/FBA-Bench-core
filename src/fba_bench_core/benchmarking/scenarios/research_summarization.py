@@ -3,7 +3,7 @@
 import random
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from .base import BaseScenario
 
@@ -11,12 +11,17 @@ from .base import BaseScenario
 class ResearchSummarizationConfig(BaseModel):
     """Configuration for research summarization scenario."""
 
-    num_docs: int = Field(gt=0, description="Number of documents")
-    max_tokens: int = Field(gt=0, description="Maximum tokens per document")
-    focus_keywords: list[str] = Field(
-        default_factory=list, description="Keywords to focus on"
+    num_docs: int = Field(default=5, gt=0, description="Number of documents")
+    max_tokens: int = Field(
+        default=200, gt=0, description="Maximum tokens per document"
     )
-    noise_probability: float = Field(ge=0.0, le=0.5, description="Probability of noise")
+    focus_keywords: list[str] = Field(
+        default=["research", "findings", "methodology"],
+        description="Keywords to focus on",
+    )
+    noise_probability: float = Field(
+        default=0.1, ge=0.0, le=0.5, description="Probability of noise"
+    )
 
 
 class ResearchSummarizationScenario(BaseScenario):
@@ -30,14 +35,12 @@ class ResearchSummarizationScenario(BaseScenario):
             params: A dictionary of parameters that configure this scenario.
         """
         super().__init__(params)
-        default_params = {
-            "num_docs": 5,
-            "max_tokens": 200,
-            "focus_keywords": ["research", "findings", "methodology"],
-            "noise_probability": 0.1,
-        }
-        merged_params = {**default_params, **(params or {})}
-        self.config = ResearchSummarizationConfig(**merged_params)
+        try:
+            self.config = ResearchSummarizationConfig(**(params or {}))
+        except ValidationError as e:
+            raise ValueError(
+                f"Invalid parameters for ResearchSummarizationScenario: {e}"
+            ) from e
 
     async def run(self, runner: Any, payload: dict[str, Any]) -> dict[str, Any]:
         """

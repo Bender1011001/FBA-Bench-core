@@ -3,6 +3,7 @@
 # Import metric modules to register them
 from . import (
     accuracy_score,
+    aggregate,
     completeness,
     cost_efficiency,
     custom_scriptable,
@@ -11,10 +12,11 @@ from . import (
     robustness,
     technical_performance,
 )
-from .registry import register_metric
+from .registry import get_metric, list_metrics, register_metric
 
 __all__ = [
     "accuracy_score",
+    "aggregate",
     "completeness",
     "cost_efficiency",
     "custom_scriptable",
@@ -22,5 +24,7 @@ __all__ = [
     "policy_compliance",
     "robustness",
     "technical_performance",
+    "get_metric",
+    "list_metrics",
     "register_metric",
 ]

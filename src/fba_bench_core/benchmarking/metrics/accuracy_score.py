@@ -2,9 +2,10 @@
 
 from typing import Any
 
-from ..registry import register_metric
+from .registry import register_metric
 
 
+@register_metric("accuracy_score")
 def accuracy_score(run: dict[str, Any], config: dict[str, Any]) -> float:
     """Calculate accuracy score."""
     output = run.get("output", "")
@@ -22,6 +23,3 @@ def accuracy_score(run: dict[str, Any], config: dict[str, Any]) -> float:
         return 1.0 if expected in output else 0.0
     else:
         return 0.0  # default
-
-
-register_metric("accuracy_score", accuracy_score)

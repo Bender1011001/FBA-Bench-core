@@ -2,7 +2,10 @@
 
 from typing import Any
 
+from .registry import register_metric
 
+
+@register_metric("aggregate")
 def aggregate_all(data: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate all metrics from a list of data points."""
     if not data:

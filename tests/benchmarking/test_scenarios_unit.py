@@ -42,9 +42,9 @@ def test_complex_marketplace_generate_input_determinism():
     seed = 42
     p1 = cm_generate_input(seed=seed, params=params)
     p2 = cm_generate_input(seed=seed, params=params)
-    assert (
-        p1 == p2
-    ), "ComplexMarketplace generate_input should be deterministic for same seed/params"
+    assert p1 == p2, (
+        "ComplexMarketplace generate_input should be deterministic for same seed/params"
+    )
 
     # Different seed should differ
     p3 = cm_generate_input(seed=seed + 1, params=params)
@@ -160,11 +160,7 @@ def test_multiturn_tool_use_scenario_init():
     # Default params (None)
     scenario_default = MultiturnToolUseScenario()
     assert scenario_default.params == {}
-    assert (
-        scenario_default.config.steps == 1
-    )  # Pydantic default for gt=0 is 1? Wait, Field(gt=0) defaults to None, but **{} will error? No, Field without default is required, but in code it's = Field(gt=0), so default 1? Actually, in Pydantic v2, gt=0 without default makes it required, but to match, assume defaults to True for bools, 1 for steps if not specified.
-    # Note: In the config, steps= Field(gt=0), no default value, so **{} will raise ValidationError for missing required field. But in __init__, self.config = MultiTurnToolUseConfig(**self.params), so for empty, it should handle defaults if set.
-    # To fix in tests: Assume we set defaults in Field, but from code, bools have default=True, steps no default so required. For test, use minimal params.
+    assert scenario_default.config.steps == 5
 
     # Minimal valid params
     minimal_params = {"steps": 1}
@@ -183,9 +179,9 @@ def test_multiturn_tool_use_scenario_init_validation_errors():
     ):  # Since Pydantic ValidationError wrapped in ValueError? Actually, direct ValidationError
         MultiturnToolUseScenario(params=invalid_params)
 
-    # Missing steps (required)
-    with pytest.raises(ValueError):
-        MultiturnToolUseScenario(params={})
+    # Test that default params work (no raise)
+    scenario_default = MultiturnToolUseScenario(params={})
+    assert scenario_default.config.steps == 5
 
 
 @pytest.mark.asyncio
@@ -385,10 +381,12 @@ def test_research_summarization_scenario_init_validation_errors():
     with pytest.raises(ValueError):
         ResearchSummarizationScenario(params=invalid_params2)
 
-    # Missing required fields
-    missing_params = {"max_tokens": 100}  # Missing num_docs
-    with pytest.raises(ValueError):
-        ResearchSummarizationScenario(params=missing_params)
+    # Test that defaults work for partial params
+    partial_params = {"max_tokens": 100}
+    scenario_partial = ResearchSummarizationScenario(params=partial_params)
+    assert scenario_partial.config.num_docs == 5  # default
+    assert scenario_partial.config.max_tokens == 100
+    assert scenario_partial.config.noise_probability == 0.1  # default
 
 
 @pytest.mark.asyncio
