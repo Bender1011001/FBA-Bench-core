@@ -12,21 +12,23 @@ Requires: jsonschema, PyYAML
 
 from __future__ import annotations
 
-import sys
 import json
+import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 try:
     import yaml  # type: ignore
-except Exception as e:
+except Exception:
     print("Missing dependency: PyYAML is required. Install with: pip install pyyaml")
     sys.exit(1)
 
 try:
-    from jsonschema import Draft7Validator  # type: ignore
-except Exception as e:
-    print("Missing dependency: jsonschema is required. Install with: pip install jsonschema")
+    from jsonschema import Draft7Validator
+except Exception:
+    print(
+        "Missing dependency: jsonschema is required. Install with: pip install jsonschema"
+    )
     sys.exit(1)
 
 
@@ -41,7 +43,7 @@ def repo_root_from_this_file() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def load_schema(schema_path: Path) -> Dict[str, Any]:
+def load_schema(schema_path: Path) -> dict[str, Any]:
     if not schema_path.exists():
         raise FileNotFoundError(f"Schema file not found: {schema_path.as_posix()}")
     with schema_path.open("r", encoding="utf-8") as f:
@@ -49,7 +51,7 @@ def load_schema(schema_path: Path) -> Dict[str, Any]:
     return schema
 
 
-def find_scenario_files(scenarios_dir: Path) -> List[Path]:
+def find_scenario_files(scenarios_dir: Path) -> list[Path]:
     if not scenarios_dir.exists():
         return []
     files = list(scenarios_dir.rglob("*.yaml")) + list(scenarios_dir.rglob("*.yml"))
@@ -58,7 +60,7 @@ def find_scenario_files(scenarios_dir: Path) -> List[Path]:
     return files
 
 
-def validate_document(doc: Any, validator: Draft7Validator) -> List[str]:
+def validate_document(doc: Any, validator: Draft7Validator) -> list[str]:
     errors = []
     for err in validator.iter_errors(doc):
         # Build a JSONPath-like location string
@@ -72,7 +74,7 @@ def validate_document(doc: Any, validator: Draft7Validator) -> List[str]:
     return errors
 
 
-def validate_file(path: Path, validator: Draft7Validator) -> Tuple[bool, List[str]]:
+def validate_file(path: Path, validator: Draft7Validator) -> tuple[bool, list[str]]:
     try:
         with path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -123,8 +125,8 @@ def main() -> int:
             passed += 1
         else:
             print(f"FAIL — {path.relative_to(repo).as_posix()}")
-            for e in errors:
-                print(f"  - {e}")
+            for err in errors:
+                print(f"  - {err}")
             failed += 1
             total_errors += len(errors)
 

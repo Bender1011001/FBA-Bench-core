@@ -1,17 +1,17 @@
 # FBA-Bench Brand Colors
 
 ## Primary Colors
-- **FBA Blue** (Primary Accent): `#61dafb`  
+- **FBA Blue** (Primary Accent): `#61dafb`
   Usage: Main buttons, links, highlights. Represents innovation and trust in AI benchmarking.
-- **Dark Background**: `#0b0e14`  
+- **Dark Background**: `#0b0e14`
   Usage: Page backgrounds for dark mode compatibility.
-- **Light Card**: `#121722`  
+- **Light Card**: `#121722`
   Usage: Section cards and containers.
 
 ## Secondary Colors
-- **Muted Text**: `#a8b0bd`  
+- **Muted Text**: `#a8b0bd`
   Usage: Subtle text, descriptions, secondary info.
-- **Foreground Text**: `#e6e6e6`  
+- **Foreground Text**: `#e6e6e6`
   Usage: Primary body text and headings.
 
 ## Usage Guidelines

@@ -12,11 +12,11 @@ This script uses only the Python standard library.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 import shutil
 import subprocess
+import sys
 import zipfile
+from pathlib import Path
 
 
 def _print_header(title: str) -> None:
@@ -33,8 +33,7 @@ def _run(cmd: list[str]) -> int:
     try:
         proc = subprocess.run(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             check=False,
         )
@@ -122,7 +121,7 @@ def create_press_kit(press_dir: Path, zip_path: Path) -> int:
                 info = zipfile.ZipInfo(filename=f.name, date_time=EPOCH)
                 info.compress_type = compression
                 # Set permissions to 0644 for files
-                info.external_attr = (0o100644 << 16)
+                info.external_attr = 0o100644 << 16
                 zf.writestr(info, data)
 
         # Atomic replace of the final zip

@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 try:
     import yaml  # type: ignore
@@ -29,13 +29,16 @@ except Exception:
     sys.exit(1)
 
 try:
-    from jsonschema import Draft7Validator  # type: ignore
+    from jsonschema import Draft7Validator
 except Exception:
-    print("Missing dependency: jsonschema is required. Install with: pip install jsonschema")
+    print(
+        "Missing dependency: jsonschema is required. Install with: pip install jsonschema"
+    )
     sys.exit(1)
 
 
 # ---------- Helpers ----------
+
 
 def _print_header(title: str) -> None:
     print("\n" + "=" * 72)
@@ -48,7 +51,7 @@ def repo_root_from_this_file() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def load_schema(schemas_dir: Path, name: str) -> Dict[str, Any]:
+def load_schema(schemas_dir: Path, name: str) -> dict[str, Any]:
     """
     Load a JSON schema by base name from schemas directory.
 
@@ -63,8 +66,8 @@ def load_schema(schemas_dir: Path, name: str) -> Dict[str, Any]:
         return json.load(f)
 
 
-def _format_errors_from_validator(doc: Any, validator: Draft7Validator) -> List[str]:
-    errors: List[str] = []
+def _format_errors_from_validator(doc: Any, validator: Draft7Validator) -> list[str]:
+    errors: list[str] = []
     for err in validator.iter_errors(doc):
         path = "$"
         for p in err.absolute_path:
@@ -78,7 +81,8 @@ def _format_errors_from_validator(doc: Any, validator: Draft7Validator) -> List[
 
 # ---------- Scenarios Validation ----------
 
-def find_scenario_files(scenarios_dir: Path) -> List[Path]:
+
+def find_scenario_files(scenarios_dir: Path) -> list[Path]:
     if not scenarios_dir.exists():
         return []
     files = list(scenarios_dir.rglob("*.yaml")) + list(scenarios_dir.rglob("*.yml"))
@@ -86,7 +90,7 @@ def find_scenario_files(scenarios_dir: Path) -> List[Path]:
     return files
 
 
-def validate_scenarios(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
+def validate_scenarios(repo: Path, schemas_dir: Path) -> dict[str, Any]:
     _print_header("SCENARIOS")
     scenarios_dir = repo / "src" / "scenarios"
     print(f"Schema: {(schemas_dir / 'scenario_schema.json').as_posix()}")
@@ -96,19 +100,33 @@ def validate_scenarios(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
         schema = load_schema(schemas_dir, "scenario_schema")
     except Exception as e:
         print(f"Failed to load scenario schema: {e}")
-        return {"ok": False, "checked": 0, "passed": 0, "failed": 0, "errors": 1, "details": []}
+        return {
+            "ok": False,
+            "checked": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 1,
+            "details": [],
+        }
 
     validator = Draft7Validator(schema)
     files = find_scenario_files(scenarios_dir)
 
     if not files:
         print("No scenario YAML files found.")
-        return {"ok": True, "checked": 0, "passed": 0, "failed": 0, "errors": 0, "details": []}
+        return {
+            "ok": True,
+            "checked": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "details": [],
+        }
 
     passed = 0
     failed = 0
     total_errors = 0
-    details: List[Dict[str, Any]] = []
+    details: list[dict[str, Any]] = []
 
     for path in files:
         rel = path.relative_to(repo).as_posix()
@@ -120,14 +138,16 @@ def validate_scenarios(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
             print(f"  - YAML parse error: {e}")
             failed += 1
             total_errors += 1
-            details.append({"path": rel, "ok": False, "errors": [f"YAML parse error: {e}"]})
+            details.append(
+                {"path": rel, "ok": False, "errors": [f"YAML parse error: {e}"]}
+            )
             continue
 
         errors = _format_errors_from_validator(data, validator)
         if errors:
             print(f"FAIL — {rel}")
-            for e in errors:
-                print(f"  - {e}")
+            for err in errors:
+                print(f"  - {err}")
             failed += 1
             total_errors += len(errors)
             details.append({"path": rel, "ok": False, "errors": errors})
@@ -153,7 +173,8 @@ def validate_scenarios(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
 
 # ---------- Leaderboard Validation ----------
 
-def _extract_leaderboard_entries(doc: Any) -> Tuple[List[Dict[str, Any]], str]:
+
+def _extract_leaderboard_entries(doc: Any) -> tuple[list[dict[str, Any]], str]:
     """
     Supports both shapes:
       - top-level array of entries
@@ -167,7 +188,7 @@ def _extract_leaderboard_entries(doc: Any) -> Tuple[List[Dict[str, Any]], str]:
     return [], "unknown"
 
 
-def validate_leaderboard(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
+def validate_leaderboard(repo: Path, schemas_dir: Path) -> dict[str, Any]:
     _print_header("LEADERBOARD")
     data_path = repo / "site" / "data" / "leaderboard.json"
     print(f"Schema: {(schemas_dir / 'leaderboard_schema.json').as_posix()}")
@@ -177,34 +198,55 @@ def validate_leaderboard(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
         schema = load_schema(schemas_dir, "leaderboard_schema")
     except Exception as e:
         print(f"Failed to load leaderboard schema: {e}")
-        return {"ok": False, "checked": 0, "passed": 0, "failed": 1, "errors": 1, "details": []}
+        return {
+            "ok": False,
+            "checked": 0,
+            "passed": 0,
+            "failed": 1,
+            "errors": 1,
+            "details": [],
+        }
 
     validator = Draft7Validator(schema)
 
     if not data_path.exists():
         msg = "leaderboard.json not found"
-        print(f"FAIL — site/data/leaderboard.json")
+        print("FAIL — site/data/leaderboard.json")
         print(f"  - {msg}")
-        return {"ok": False, "checked": 0, "passed": 0, "failed": 1, "errors": 1, "details": [msg]}
+        return {
+            "ok": False,
+            "checked": 0,
+            "passed": 0,
+            "failed": 1,
+            "errors": 1,
+            "details": [msg],
+        }
 
     try:
         with data_path.open("r", encoding="utf-8") as f:
             doc = json.load(f)
     except Exception as e:
-        print(f"FAIL — site/data/leaderboard.json")
+        print("FAIL — site/data/leaderboard.json")
         print(f"  - JSON parse error: {e}")
-        return {"ok": False, "checked": 1, "passed": 0, "failed": 1, "errors": 1, "details": [f"JSON parse error: {e}"]}
+        return {
+            "ok": False,
+            "checked": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 1,
+            "details": [f"JSON parse error: {e}"],
+        }
 
     errors = _format_errors_from_validator(doc, validator)
     passed = 0
     failed = 0
     total_errors = 0
-    details: List[str] = []
+    details: list[str] = []
 
     if errors:
         print("FAIL — site/data/leaderboard.json")
-        for e in errors:
-            print(f"  - {e}")
+        for err in errors:
+            print(f"  - {err}")
         failed += 1
         total_errors += len(errors)
         details.extend(errors)
@@ -216,7 +258,7 @@ def validate_leaderboard(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
     entries, shape = _extract_leaderboard_entries(doc)
     if entries:
         seen = set()
-        dupes: List[str] = []
+        dupes: list[str] = []
         for idx, item in enumerate(entries):
             if not isinstance(item, dict):
                 # shape validated by schema; if not, it would appear above
@@ -236,7 +278,7 @@ def validate_leaderboard(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
             total_errors += len(dupes)
             details.extend(dupes)
 
-    print(f"Checked: 1")
+    print("Checked: 1")
     print(f"Passed: {passed}")
     print(f"Failed: {failed}")
     print(f"Errors: {total_errors}")
@@ -253,24 +295,39 @@ def validate_leaderboard(repo: Path, schemas_dir: Path) -> Dict[str, Any]:
 
 # ---------- Golden Masters Validation ----------
 
-def validate_golden_masters(repo: Path) -> Dict[str, Any]:
+
+def validate_golden_masters(repo: Path) -> dict[str, Any]:
     _print_header("GOLDEN MASTERS")
     gm_dir = repo / "golden_masters"
     print(f"Scanning: {gm_dir.as_posix()}")
 
     if not gm_dir.exists():
         print("No golden_masters directory found.")
-        return {"ok": True, "checked": 0, "passed": 0, "failed": 0, "errors": 0, "details": []}
+        return {
+            "ok": True,
+            "checked": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "details": [],
+        }
 
     files = sorted({p.resolve() for p in gm_dir.rglob("*.json")})
     if not files:
         print("No JSON files found in golden_masters.")
-        return {"ok": True, "checked": 0, "passed": 0, "failed": 0, "errors": 0, "details": []}
+        return {
+            "ok": True,
+            "checked": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "details": [],
+        }
 
     passed = 0
     failed = 0
     total_errors = 0
-    details: List[Dict[str, Any]] = []
+    details: list[dict[str, Any]] = []
 
     for path in files:
         rel = path.relative_to(repo).as_posix()
@@ -285,7 +342,9 @@ def validate_golden_masters(repo: Path) -> Dict[str, Any]:
             print(f"  - JSON parse error: {e}")
             failed += 1
             total_errors += 1
-            details.append({"path": rel, "ok": False, "errors": [f"JSON parse error: {e}"]})
+            details.append(
+                {"path": rel, "ok": False, "errors": [f"JSON parse error: {e}"]}
+            )
 
     print(f"Checked: {len(files)}")
     print(f"Passed: {passed}")
@@ -304,7 +363,8 @@ def validate_golden_masters(repo: Path) -> Dict[str, Any]:
 
 # ---------- Print summary and main ----------
 
-def print_results(results: Dict[str, Dict[str, Any]]) -> None:
+
+def print_results(results: dict[str, dict[str, Any]]) -> None:
     _print_header("SUMMARY")
     total_checked = sum(section["checked"] for section in results.values())
     total_passed = sum(section["passed"] for section in results.values())

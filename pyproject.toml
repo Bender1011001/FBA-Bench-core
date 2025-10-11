@@ -1,56 +1,84 @@
-[build-system]
-requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "fba-bench-core"
-version = "0.1.0"
-description = "Core library for FBA-Bench"
+version = "1.0.0"
+description = "Core interfaces, data models, and events for the FBA-Bench simulation platform."
+authors = ["FBA Team <devnull@example.com>"]
+license = "Apache-2.0"
 readme = "README.md"
-license = { file = "LICENSE" }
-authors = [
-  { name = "FBA Team", email = "devnull@example.com" }
-]
-requires-python = ">=3.9"
-dependencies = [
-  "pyyaml>=6.0",
-  "jsonschema>=4.0"
-]
-
-[project.optional-dependencies]
-dev = [
-  "pytest",
-  "pytest-cov",
-  "ruff",
-  "black",
-  "mypy",
-  "pre-commit"
-]
-docs = [
-  "sphinx",
-  "sphinx-rtd-theme"
+packages = [{include = "fba_bench_core", from = "src"}]
+keywords = ["benchmarking", "simulation", "fba", "pydantic", "typing"]
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: Apache Software License",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["fba_bench_core*"]
+[tool.poetry.urls]
+Homepage = "https://github.com/your-org/fba-bench-core"
+Repository = "https://github.com/your-org/fba-bench-core"
+Documentation = "https://your-org.github.io/fba-bench-core"
+Issues = "https://github.com/your-org/fba-bench-core/issues"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.23.0"
+black = "^24.3.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+poetry-dynamic-versioning = "^0.19.0"
+towncrier = "^21.0.0"
+bumpver = "^2023.1128"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry-dynamic-versioning]
+# Enable Git-tag driven dynamic versioning for reproducible SemVer releases.
+enable = true
+vcs = "git"
+fallback-version = "0.0.0"
+
+[tool.towncrier]
+# towncrier will collect news fragments from `newsfragments/` and build CHANGELOG.md
+package = "fba_bench_core"
+directory = "newsfragments"
+filename = "CHANGELOG.md"
+
+[tool.isort]
+profile = "black"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py311"
 line-length = 88
 src = ["src"]
+
+[tool.ruff.lint]
 select = ["E", "F", "I"]
 extend-select = ["UP"]
+ignore = ["E501"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39"]
+target-version = ["py311"]
+
+[tool.flake8]
+max-line-length = 88
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 ignore_missing_imports = true
 pretty = true
 warn_unused_ignores = true
+files = ["src/fba_bench_core", "tests"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

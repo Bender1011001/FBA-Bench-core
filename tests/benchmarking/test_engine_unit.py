@@ -4,8 +4,14 @@ import pytest
 from pydantic import ValidationError
 
 # Import new engine API and models
-from benchmarking.core.engine import Engine, EngineConfig, EngineReport, RunnerSpec, ScenarioSpec
-from benchmarking.scenarios.registry import scenario_registry
+from fba_bench_core.benchmarking.core.engine import (
+    Engine,
+    EngineConfig,
+    EngineReport,
+    RunnerSpec,
+    ScenarioSpec,
+)
+from fba_bench_core.benchmarking.scenarios.registry import scenario_registry
 
 
 @pytest.fixture(autouse=True)
@@ -68,7 +74,9 @@ async def test_timeout_handling(monkeypatch):
     cfg.scenarios[0].timeout_seconds = 0.05
 
     # Avoid instantiating a real runner by monkeypatching create_runner to a dummy object
-    from agent_runners import registry as runner_registry
+    from fba_bench_core.agents.registry import create_runner
+
+    runner_registry = type("MockRegistry", (), {"create_runner": create_runner})()
 
     class DummyRunner:
         agent_id = "dummy"
@@ -106,7 +114,9 @@ async def test_retries_flaky_scenario(monkeypatch):
         retries=1,  # allow one retry
     )
 
-    from agent_runners import registry as runner_registry
+    from fba_bench_core.agents.registry import create_runner
+
+    runner_registry = type("MockRegistry", (), {"create_runner": create_runner})()
 
     class DummyRunner:
         agent_id = "dummy"
@@ -137,7 +147,7 @@ async def test_metrics_application_mean_aggregates(monkeypatch):
             return 1.0
 
     # Patch MetricRegistry.create_metric to return our dummy for 'dummy_metric'
-    from benchmarking.core.engine import MetricRegistry
+    from fba_bench_core.benchmarking.core.engine import MetricRegistry
 
     def create_metric(self, name, config=None):
         if name == "dummy_metric":
@@ -167,7 +177,10 @@ async def test_metrics_application_mean_aggregates(monkeypatch):
     # All runs should carry dummy_metric=1.0
     assert all(r.metrics.get("dummy_metric") == 1.0 for r in sr.runs)
     # Aggregated mean equals 1.0
-    assert pytest.approx(sr.aggregates["metrics"]["mean"]["dummy_metric"], rel=0, abs=1e-9) == 1.0
+    assert (
+        pytest.approx(sr.aggregates["metrics"]["mean"]["dummy_metric"], rel=0, abs=1e-9)
+        == 1.0
+    )
 
 
 @pytest.mark.unit
@@ -197,14 +210,16 @@ async def test_validator_injection(monkeypatch):
             return DummyValidationResult()
 
     # Patch ValidatorRegistry.create_validator
-    from benchmarking.core.engine import ValidatorRegistry
+    from fba_bench_core.benchmarking.core.engine import ValidatorRegistry
 
     def create_validator(self, name, config=None):
         if name == "dummy_validator":
             return DummyValidator()
         return None
 
-    monkeypatch.setattr(ValidatorRegistry, "create_validator", create_validator, raising=True)
+    monkeypatch.setattr(
+        ValidatorRegistry, "create_validator", create_validator, raising=True
+    )
 
     from agent_runners import registry as runner_registry
 

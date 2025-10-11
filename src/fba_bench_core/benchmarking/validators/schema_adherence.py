@@ -1,0 +1,1 @@
+"""Schema adherence validator."""

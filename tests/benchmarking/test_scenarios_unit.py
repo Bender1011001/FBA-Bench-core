@@ -1,17 +1,31 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
 
 # Import scenario modules to ensure registration happens on import
-from benchmarking.scenarios import registry as sc_reg  # noqa: F401
-from benchmarking.scenarios.complex_marketplace import ComplexMarketplaceConfig
-from benchmarking.scenarios.complex_marketplace import generate_input as cm_generate_input
-from benchmarking.scenarios.complex_marketplace import postprocess as cm_postprocess
-from benchmarking.scenarios.multiturn_tool_use import MultiTurnToolUseConfig
-from benchmarking.scenarios.multiturn_tool_use import generate_input as mt_generate_input
-from benchmarking.scenarios.research_summarization import ResearchSummarizationConfig
-from benchmarking.scenarios.research_summarization import generate_input as rs_generate_input
+from fba_bench_core.benchmarking.scenarios import registry as sc_reg  # noqa: F401
+from fba_bench_core.benchmarking.scenarios.complex_marketplace import (
+    ComplexMarketplaceConfig,
+)
+from fba_bench_core.benchmarking.scenarios.complex_marketplace import (
+    generate_input as cm_generate_input,
+)
+from fba_bench_core.benchmarking.scenarios.complex_marketplace import (
+    postprocess as cm_postprocess,
+)
+from fba_bench_core.benchmarking.scenarios.multiturn_tool_use import (
+    MultiTurnToolUseConfig,
+)
+from fba_bench_core.benchmarking.scenarios.multiturn_tool_use import (
+    generate_input as mt_generate_input,
+)
+from fba_bench_core.benchmarking.scenarios.research_summarization import (
+    ResearchSummarizationConfig,
+)
+from fba_bench_core.benchmarking.scenarios.research_summarization import (
+    generate_input as rs_generate_input,
+)
 
 
 def test_complex_marketplace_generate_input_determinism():
@@ -114,7 +128,7 @@ def test_complex_marketplace_postprocess_rounding_normalization():
         },
     ],
 )
-def test_complex_marketplace_generate_input_schema(params: Dict[str, Any]):
+def test_complex_marketplace_generate_input_schema(params: dict[str, Any]):
     seed = 99
     payload = cm_generate_input(seed=seed, params=params)
     assert "catalog" in payload and isinstance(payload["catalog"], list)
