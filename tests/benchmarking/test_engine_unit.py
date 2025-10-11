@@ -3,8 +3,8 @@ import asyncio
 import pytest
 from pydantic import ValidationError
 
-# Import new engine API and models
-from fba_bench_core.benchmarking.core.engine import (
+# Import engine API and models from new location
+from fba_bench_core.benchmarking.engine import (
     Engine,
     EngineConfig,
     EngineReport,
@@ -147,7 +147,7 @@ async def test_metrics_application_mean_aggregates(monkeypatch):
             return 1.0
 
     # Patch MetricRegistry.create_metric to return our dummy for 'dummy_metric'
-    from fba_bench_core.benchmarking.core.engine import MetricRegistry
+    from fba_bench_core.benchmarking.metrics.registry import MetricRegistry
 
     def create_metric(self, name, config=None):
         if name == "dummy_metric":
@@ -210,7 +210,7 @@ async def test_validator_injection(monkeypatch):
             return DummyValidationResult()
 
     # Patch ValidatorRegistry.create_validator
-    from fba_bench_core.benchmarking.core.engine import ValidatorRegistry
+    from fba_bench_core.benchmarking.validators.registry import ValidatorRegistry
 
     def create_validator(self, name, config=None):
         if name == "dummy_validator":
