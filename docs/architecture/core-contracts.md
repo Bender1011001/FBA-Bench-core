@@ -25,12 +25,13 @@ Product
 - Purpose: canonical representation of a sellable SKU used by simulations and
   pricing/inventory logic.
 - Key fields: product_id, sku, name, cost (Decimal), price (Decimal), stock (int),
-  max_inventory (Optional[int]), fulfillment_latency (Optional[int]).
+  max_inventory (Optional[int]), fulfillment_latency (Optional[int]), category (Optional[str]).
 - Invariants:
-  - cost and price are stored as Decimal for financial precision.
+  - cost and price are stored as Decimal for financial precision; cost > 0, price > 0.
   - price >= cost (domain-level rule; loss-leading scenarios should be modeled
     as promotions or events in the simulation layer).
   - stock >= 0 and, if present, stock <= max_inventory.
+  - fulfillment_latency >= 0 if provided.
 - Where enforced: see model validators in
   [`src/fba_bench_core/domain/models.py`](src/fba_bench_core/domain/models.py:1)
 
@@ -50,12 +51,14 @@ CompetitorListing & Competitor
 - Purpose: represent external marketplace listings used by repricing logic.
 - CompetitorListing fields: sku, price (Decimal), rating, fulfillment_latency,
   marketplace.
-- Competitor invariants: listing SKUs must be unique when provided.
+- Competitor invariants: listing SKUs must be unique when provided; price >= 0.
+- Competitor fields: competitor_id, name, listings (list of CompetitorListing), operating_regions, primary_marketplace.
 
 DemandProfile
 
 - Purpose: compact stochastic demand assumptions (mean/std) per product.
 - Invariants: daily_demand_mean >= 0, daily_demand_std >= 0.
+- Fields: product_id, daily_demand_mean (float), daily_demand_std (float), segment (Optional[str]).
 
 Events & Commands taxonomy
 
@@ -69,17 +72,24 @@ Base contracts
 
 Representative events
 
-- SaleOccurred: finalized sale; includes revenue, quantity, gross_margin.
-- StockReplenished / StockDepleted / FulfillmentDelayed: inventory signals.
-- PromotionLaunched / DemandSpiked: marketing and demand signals.
-- ForecastUpdated / AnomalyDetected: analytics & monitoring events.
+- SaleOccurred: finalized sale; includes revenue, quantity, gross_margin, currency, channel, customer_segment.
+- PriceChangedExternally: competitor price change with CompetitorListing embed.
+- DemandSpiked: abrupt demand increase with delta, trigger, optional DemandProfile.
+- CompetitorAction: competitor strategic actions (price_adjustment, promotion_launch, etc.).
+- StockReplenished / StockDepleted: inventory changes with snapshots or quantities.
+- FulfillmentDelayed / SupplyDisruption: logistics signals.
+- PromotionLaunched / CustomerComplaintLogged: marketing and customer service events.
+- ForecastUpdated / AnomalyDetected: analytics and monitoring.
 
 Representative commands
 
-- AdjustPriceCommand: propose a new price for a product (proposed_price:
-  Decimal).
-- LaunchPromotionCommand: instruct system to apply discounts or promos.
-- PlaceReplenishmentOrderCommand: place supplier orders with quantity, priority.
+- AdjustPriceCommand: propose new price (proposed_price: Decimal, effective_from optional).
+- LaunchPromotionCommand: launch promotion with discount_percent, start/end dates.
+- PlaceReplenishmentOrderCommand: replenish inventory with supplier, quantity, priority.
+- TransferInventoryCommand / UpdateSafetyStockCommand / AdjustInventoryCommand: inventory operations.
+- ResolveCustomerIssueCommand / StartCustomerOutreachCommand / RespondToComplaintCommand: customer service.
+- ReforecastDemandCommand / AdjustFulfillmentLatencyCommand: analytical and logistics adjustments.
+- NegotiateSupplyCommand / MonitorCompetitorCommand: supplier and competitor management.
 
 How events and commands are intended to flow
 
@@ -108,7 +118,9 @@ Agent & Service base classes
 Typed configuration contracts
 
 - BaseAgentConfig and BaseServiceConfig are frozen Pydantic models (immutable)
-  that forbid extra fields and validate identifiers (slug-style).
+  that forbid extra fields and validate identifiers (slug-style: alphanum, hyphen, underscore).
+- Fields: agent_id/service_id (required slug), poll_interval_seconds, max_concurrent_tasks, default_region, metadata (dict[str, primitive]).
+- Metadata: shallow mapping of str keys to primitive values (str, int, float, bool); no nested structures.
 - Downstream pattern: subclass the Base*Config types to add domain-specific
   fields and use model_copy(update={...}) for controlled modifications.
 

@@ -5,10 +5,10 @@ Phase D change:
   object. Downstream implementations should subclass the provided config model
   for specialized parameters.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 from fba_bench_core.config import BaseAgentConfig
 from fba_bench_core.domain.events import BaseEvent, Command
@@ -65,7 +65,7 @@ class BaseAgent(ABC):
         """
         return self._config
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> dict:
         """Return a serializable shallow mapping of the configuration.
 
         Returns:
@@ -74,7 +74,7 @@ class BaseAgent(ABC):
         return self._config.model_dump()
 
     @abstractmethod
-    async def decide(self, events: List[BaseEvent]) -> List[Command]:
+    async def decide(self, events: list[BaseEvent]) -> list[Command]:
         """Decide on a list of Commands given observed domain events.
 
         Implementations must be async coroutines and must not mutate the

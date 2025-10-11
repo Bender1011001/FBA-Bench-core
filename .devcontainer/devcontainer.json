@@ -5,11 +5,7 @@
   ],
   "service": "dev",
   "workspaceFolder": "/app",
-
-  // Ensure VS Code attaches to the running container and leaves entrypoint/command control to the dev service
   "overrideCommand": false,
-
-  // Recommended VS Code customizations for Python DX
   "customizations": {
     "vscode": {
       "extensions": [
@@ -21,7 +17,6 @@
         "eamodio.gitlens"
       ],
       "settings": {
-        // Use Black for formatting Python
         "python.formatting.provider": "none",
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
@@ -30,9 +25,7 @@
             "source.organizeImports": "explicit"
           }
         },
-        // Enable Ruff linting (formatter remains Black)
         "ruff.enable": true,
-        // General editor quality-of-life
         "editor.formatOnSave": true,
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
@@ -40,13 +33,7 @@
       }
     }
   },
-
-  // After container is created, install dev deps and enable pre-commit hooks
   "postCreateCommand": "bash -lc 'pip install -e \".[dev]\" && pre-commit install'",
-
-  // Use root (base image defaults) unless you intend to create a non-root user
   "remoteUser": "root",
-
-  // Forward commonly used ports if needed later (no ports required for this project by default)
   "forwardPorts": []
 }

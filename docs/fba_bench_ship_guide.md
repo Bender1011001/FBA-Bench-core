@@ -1,7 +1,7 @@
 # FBA-Bench Core: Production Ship-Readiness Guide
 
-**Version**: 1.0  
-**Target Audience**: Development Team  
+**Version**: 1.0
+**Target Audience**: Development Team
 **Objective**: Transform FBA-Bench-core from staging to production-ready
 
 ---
@@ -202,7 +202,7 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
         exclude: package.lock.json
-  
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -213,7 +213,7 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: detect-private-key
-  
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.9
     hooks:
@@ -326,7 +326,7 @@ import glob
 for filepath in glob.glob('**/*.py', recursive=True):
     if filepath.startswith('.venv') or filepath.startswith('build'):
         continue
-    
+
     with open(filepath, 'r+') as f:
         content = f.read()
         if 'Copyright' not in content:
@@ -365,24 +365,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           pip install ruff black mypy
           pip install -e .
-      
+
       - name: Run ruff
         run: ruff check .
-      
+
       - name: Run black
         run: black --check .
-      
+
       - name: Run mypy
         run: mypy src/
         continue-on-error: true  # Remove after fixing type issues
@@ -392,24 +392,24 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           pip install pytest pytest-cov
           pip install -e .
-      
+
       - name: Run tests
         run: pytest --cov=src --cov-report=xml --cov-report=term
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -420,12 +420,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Validate JSON files
         run: |
           python - <<'PY'
@@ -445,7 +445,7 @@ jobs:
               print("⚠️  golden_masters/ not found")
               sys.exit(0)
           PY
-      
+
       - name: Validate scenario YAML
         run: |
           pip install pyyaml jsonschema
@@ -455,19 +455,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Validate HTML
         uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
           root: site/
           extra: --ignore-re "Element .* not allowed as child"
-      
+
       - name: Validate leaderboard JSON
         run: |
           python - <<'PY'
           import json, sys
           from jsonschema import validate, ValidationError
-          
+
           schema = {
               "type": "array",
               "items": {
@@ -604,16 +604,16 @@ def validate_scenarios() -> List[Tuple[str, bool, str]]:
     results = []
     schema = load_schema("scenario_schema")
     validator = Draft7Validator(schema)
-    
+
     scenario_dir = Path("src/fba_bench_core/scenarios")
     if not scenario_dir.exists():
         return [("scenarios", False, "Directory not found")]
-    
+
     for yaml_file in scenario_dir.glob("*.yaml"):
         try:
             with open(yaml_file) as f:
                 data = yaml.safe_load(f)
-            
+
             # Validate against schema
             errors = list(validator.iter_errors(data))
             if errors:
@@ -621,28 +621,28 @@ def validate_scenarios() -> List[Tuple[str, bool, str]]:
                 results.append((str(yaml_file), False, error_msg))
             else:
                 results.append((str(yaml_file), True, "Valid"))
-        
+
         except Exception as e:
             results.append((str(yaml_file), False, str(e)))
-    
+
     return results
 
 def validate_leaderboard() -> List[Tuple[str, bool, str]]:
     """Validate leaderboard JSON."""
     results = []
     schema = load_schema("leaderboard_schema")
-    
+
     leaderboard_path = Path("site/data/leaderboard.json")
-    
+
     if not leaderboard_path.exists():
         return [("leaderboard.json", False, "File not found")]
-    
+
     try:
         with open(leaderboard_path) as f:
             data = json.load(f)
-        
+
         validate(instance=data, schema=schema)
-        
+
         # Additional validations
         if not data:
             results.append(("leaderboard.json", True, "Valid (empty)"))
@@ -653,27 +653,27 @@ def validate_leaderboard() -> List[Tuple[str, bool, str]]:
                 results.append(("leaderboard.json", False, "Duplicate entries found"))
             else:
                 results.append(("leaderboard.json", True, f"Valid ({len(data)} entries)"))
-    
+
     except ValidationError as e:
         results.append(("leaderboard.json", False, e.message))
     except Exception as e:
         results.append(("leaderboard.json", False, str(e)))
-    
+
     return results
 
 def validate_golden_masters() -> List[Tuple[str, bool, str]]:
     """Validate golden master JSON files."""
     results = []
     gm_dir = Path("golden_masters")
-    
+
     if not gm_dir.exists():
         return [("golden_masters", False, "Directory not found")]
-    
+
     json_files = list(gm_dir.rglob("*.json"))
-    
+
     if not json_files:
         return [("golden_masters", True, "No JSON files (OK)")]
-    
+
     for json_file in json_files:
         try:
             with open(json_file) as f:
@@ -681,7 +681,7 @@ def validate_golden_masters() -> List[Tuple[str, bool, str]]:
             results.append((str(json_file), True, "Valid JSON"))
         except Exception as e:
             results.append((str(json_file), False, str(e)))
-    
+
     return results
 
 def print_results(category: str, results: List[Tuple[str, bool, str]]):
@@ -689,37 +689,37 @@ def print_results(category: str, results: List[Tuple[str, bool, str]]):
     print(f"\n{'='*80}")
     print(f"  {category}")
     print(f"{'='*80}")
-    
+
     for filepath, passed, message in results:
         status = "✅" if passed else "❌"
         print(f"{status} {filepath}")
         if not passed or message != "Valid":
             print(f"   └─ {message}")
-    
+
     passed_count = sum(1 for _, p, _ in results if p)
     total_count = len(results)
     print(f"\n📊 {passed_count}/{total_count} passed")
 
 def main():
     print("🔍 Running comprehensive validation...\n")
-    
+
     all_passed = True
-    
+
     # Validate scenarios
     scenario_results = validate_scenarios()
     print_results("SCENARIOS", scenario_results)
     all_passed &= all(p for _, p, _ in scenario_results)
-    
+
     # Validate leaderboard
     leaderboard_results = validate_leaderboard()
     print_results("LEADERBOARD", leaderboard_results)
     all_passed &= all(p for _, p, _ in leaderboard_results)
-    
+
     # Validate golden masters
     gm_results = validate_golden_masters()
     print_results("GOLDEN MASTERS", gm_results)
     all_passed &= all(p for _, p, _ in gm_results)
-    
+
     print(f"\n{'='*80}")
     if all_passed:
         print("✨ All validations passed!")
@@ -796,7 +796,7 @@ class BaseMetric(ABC):
     def calculate(self, agent_output: Dict[str, Any]) -> float:
         """Calculate metric score (0-100)."""
         pass
-    
+
     @abstractmethod
     def get_details(self) -> Dict[str, Any]:
         """Get detailed breakdown of metric calculation."""
@@ -813,7 +813,7 @@ class BaseAgent(ABC):
     def execute(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the scenario and return results."""
         pass
-    
+
     @abstractmethod
     def reset(self) -> None:
         """Reset agent state between runs."""
@@ -1011,7 +1011,7 @@ def test_scenario_loader_validates_tier():
     """Test that scenario loader rejects invalid tiers."""
     from fba_bench_core.scenarios import load_scenario
     import pytest
-    
+
     with pytest.raises(ValueError, match="Invalid tier"):
         load_scenario(tier=5)
 ```
@@ -1199,7 +1199,7 @@ evaluation:
   thresholds:
     pass: 60.0
     excellent: 85.0
-  
+
   success_criteria:
     - name: "Correctness"
       weight: 0.6
@@ -1234,36 +1234,36 @@ from ..agents import BaseAgent
 class SimpleBot(BaseAgent):
     """
     Simple rule-based agent that follows basic heuristics.
-    
+
     This agent provides a baseline for comparison and demonstrates
     the minimum viable implementation of the agent interface.
     """
-    
+
     def __init__(self, name: str = "SimpleBot"):
         self.name = name
         self.actions_log = []
         self.start_time = None
-    
+
     def execute(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute scenario using simple rule-based logic.
-        
+
         Args:
             scenario: Scenario configuration dictionary
-        
+
         Returns:
             Execution results including actions taken and metrics
         """
         self.start_time = time.time()
         self.actions_log = []
-        
+
         # Extract scenario parameters
         tier = scenario.get("tier", 0)
         constraints = scenario.get("constraints", {})
-        
+
         # Simulate execution
         self._log_action("initialize", {"scenario_id": scenario.get("id")})
-        
+
         # Simple decision logic
         if tier == 0:
             result = self._execute_tier_0(scenario)
@@ -1271,9 +1271,9 @@ class SimpleBot(BaseAgent):
             result = self._execute_tier_1(scenario)
         else:
             result = self._execute_tier_2(scenario)
-        
+
         execution_time = time.time() - self.start_time
-        
+
         return {
             "agent": self.name,
             "scenario_id": scenario.get("id"),
@@ -1282,33 +1282,33 @@ class SimpleBot(BaseAgent):
             "execution_time": execution_time,
             "result": result
         }
-    
+
     def _execute_tier_0(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute tier 0 (baseline) scenario."""
         self._log_action("read_input", {"file": scenario.get("inputs", {}).get("data_file")})
         time.sleep(0.1)  # Simulate processing
-        
+
         self._log_action("transform_data", {"format": "json"})
         time.sleep(0.1)
-        
+
         self._log_action("write_output", {"file": scenario.get("inputs", {}).get("output_file")})
-        
+
         return {"success": True, "records_processed": 100}
-    
+
     def _execute_tier_1(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute tier 1 (moderate) scenario."""
         # More complex logic for tier 1
         self._log_action("analyze_constraints", scenario.get("constraints", {}))
         self._log_action("plan_execution", {})
-        
+
         return self._execute_tier_0(scenario)
-    
+
     def _execute_tier_2(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute tier 2 (advanced) scenario."""
         # Complex multi-step logic for tier 2
         self._log_action("initialize_coordination", {})
         return self._execute_tier_1(scenario)
-    
+
     def _log_action(self, action_type: str, details: Dict[str, Any]):
         """Log an action taken by the agent."""
         self.actions_log.append({
@@ -1316,7 +1316,7 @@ class SimpleBot(BaseAgent):
             "action": action_type,
             "details": details
         })
-    
+
     def reset(self) -> None:
         """Reset agent state."""
         self.actions_log = []
@@ -1343,25 +1343,25 @@ class MetricResult:
 
 class BaseMetric(ABC):
     """Base class for all metrics."""
-    
+
     def __init__(self, name: str, weight: float = 1.0):
         self.name = name
         self.weight = weight
-    
+
     @abstractmethod
     def calculate(self, agent_output: Dict[str, Any], scenario: Dict[str, Any]) -> MetricResult:
         """
         Calculate metric score from agent output.
-        
+
         Args:
             agent_output: Results from agent execution
             scenario: Original scenario configuration
-        
+
         Returns:
             MetricResult with score and details
         """
         pass
-    
+
     def normalize_score(self, raw_score: float, min_val: float = 0, max_val: float = 100) -> float:
         """Normalize score to 0-100 range."""
         if max_val == min_val:
@@ -1371,21 +1371,21 @@ class BaseMetric(ABC):
 
 class MetricSuite:
     """Collection of metrics for evaluation."""
-    
+
     def __init__(self, metrics: List[BaseMetric]):
         self.metrics = metrics
-    
+
     def evaluate(self, agent_output: Dict[str, Any], scenario: Dict[str, Any]) -> Dict[str, Any]:
         """
         Evaluate agent output using all metrics in suite.
-        
+
         Returns:
             Dictionary with individual metric scores and overall score
         """
         results = {}
         total_weight = sum(m.weight for m in self.metrics)
         weighted_sum = 0.0
-        
+
         for metric in self.metrics:
             result = metric.calculate(agent_output, scenario)
             results[metric.name] = {
@@ -1395,9 +1395,9 @@ class MetricSuite:
                 "details": result.details
             }
             weighted_sum += result.score * metric.weight
-        
+
         overall_score = weighted_sum / total_weight if total_weight > 0 else 0.0
-        
+
         return {
             "overall_score": overall_score,
             "metrics": results,
@@ -1414,34 +1414,34 @@ from .base import BaseMetric, MetricResult
 
 class OperationsMetric(BaseMetric):
     """Measures operational efficiency."""
-    
+
     def __init__(self):
         super().__init__("operations", weight=1.0)
-    
+
     def calculate(self, agent_output: Dict[str, Any], scenario: Dict[str, Any]) -> MetricResult:
         """Calculate operations efficiency score."""
         constraints = scenario.get("constraints", {})
         time_limit = constraints.get("time_limit", float('inf'))
         max_api_calls = constraints.get("max_api_calls", float('inf'))
-        
+
         execution_time = agent_output.get("execution_time", 0)
         actions_count = len(agent_output.get("actions", []))
-        
+
         # Calculate time efficiency (0-50 points)
         time_score = 0.0
         if execution_time <= time_limit:
             time_efficiency = 1.0 - (execution_time / time_limit)
             time_score = time_efficiency * 50
-        
+
         # Calculate resource efficiency (0-50 points)
         resource_score = 0.0
         if actions_count <= max_api_calls:
             resource_efficiency = 1.0 - (actions_count / max_api_calls)
             resource_score = resource_efficiency * 50
-        
+
         total_score = time_score + resource_score
         passed = total_score >= 60.0
-        
+
         return MetricResult(
             score=total_score,
             passed=passed,
@@ -1519,7 +1519,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: pytest -v
-  
+
   dev:
     build: .
     volumes:
@@ -1602,7 +1602,7 @@ from fba_bench_core.scenarios import load_scenario
 scenario = load_scenario(tier=0)
 print(f"Loaded: {          }
           }
-          
+
           try:
               with open('site/data/leaderboard.json') as f:
                   data = json.load(f)
@@ -1617,12 +1617,12 @@ print(f"Loaded: {          }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Bandit security scan
         run: |
           pip install bandit
           bandit -r src/ -f json -o bandit-report.json || true
-      
+
       - name: Check for secrets
         run: |
           pip install detect-secrets
@@ -1643,10 +1643,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -1696,11 +1696,11 @@ def validate_scenario(filepath: Path) -> bool:
     try:
         with open(filepath) as f:
             data = yaml.safe_load(f)
-        
+
         validate(instance=data, schema=SCENARIO_SCHEMA)
         print(f"✅ {filepath}")
         return True
-    
+
     except ValidationError as e:
         print(f"❌ {filepath}: {e.message}")
         return False
@@ -1713,18 +1713,18 @@ def main():
     if not scenario_dir.exists():
         print(f"⚠️  {scenario_dir} not found")
         return 0
-    
+
     scenarios = list(scenario_dir.glob("**/*.yaml")) + list(scenario_dir.glob("**/*.yml"))
-    
+
     if not scenarios:
         print("⚠️  No scenario files found")
         return 0
-    
+
     results = [validate_scenario(s) for s in scenarios]
-    
+
     passed = sum(results)
     total = len(results)
-    
+
     print(f"\n📊 Results: {passed}/{total} passed")
     return 0 if all(results) else 1
 
@@ -1958,31 +1958,31 @@ from typing import Dict, Any
 
 def load_scenario(tier: int) -> Dict[str, Any]:
     """Load a scenario by tier number.
-    
+
     Args:
         tier: Scenario tier (0, 1, or 2)
-    
+
     Returns:
         Scenario configuration dictionary
-    
+
     Raises:
         ValueError: If tier is invalid
         FileNotFoundError: If scenario file doesn't exist
     """
     if tier not in (0, 1, 2):
         raise ValueError(f"Invalid tier: {tier}. Must be 0, 1, or 2.")
-    
+
     scenario_map = {
         0: "tier_0_baseline.yaml",
         1: "tier_1_moderate.yaml",
         2: "tier_2_advanced.yaml",
     }
-    
+
     scenario_path = Path(__file__).parent / scenario_map[tier]
-    
+
     if not scenario_path.exists():
         raise FileNotFoundError(f"Scenario file not found: {scenario_path}")
-    
+
     with open(scenario_path) as f:
         return yaml.safe_load(f)
 
@@ -2012,13 +2012,13 @@ __all__ = ["load_scenario"]
 2. **Create a virtual environment:**
    ```bash
    python3.9 -m venv .venv
-   
+
    # Activate on Linux/macOS:
    source .venv/bin/activate
-   
+
    # Activate on Windows (PowerShell):
    .\.venv\Scripts\Activate.ps1
-   
+
    # Activate on Windows (cmd):
    .\.venv\Scripts\activate.bat
    ```
@@ -2026,7 +2026,7 @@ __all__ = ["load_scenario"]
 3. **Install the package:**
    ```bash
    pip install -e .
-   
+
    # Or with development dependencies:
    pip install -e ".[dev]"
    ```
@@ -2073,14 +2073,14 @@ from zipfile import ZipFile, ZIP_DEFLATED
 def optimize_images():
     """Optimize PNG and SVG files."""
     assets_dir = Path("site/assets/press")
-    
+
     # Optimize PNGs with optipng (if available)
     png_files = list(assets_dir.glob("**/*.png"))
     if png_files and shutil.which("optipng"):
         for png in png_files:
             subprocess.run(["optipng", "-o7", str(png)], check=False)
             print(f"✅ Optimized {png}")
-    
+
     # Optimize SVGs with svgo (if available)
     svg_files = list(assets_dir.glob("**/*.svg"))
     if svg_files and shutil.which("svgo"):
@@ -2092,11 +2092,11 @@ def create_press_kit():
     """Create press kit ZIP file."""
     assets_dir = Path("site/assets/press")
     output_zip = assets_dir / "press-kit.zip"
-    
+
     # Remove old ZIP if exists
     if output_zip.exists():
         output_zip.unlink()
-    
+
     # Create new ZIP
     with ZipFile(output_zip, 'w', ZIP_DEFLATED) as zipf:
         # Add all files from press directory
@@ -2105,7 +2105,7 @@ def create_press_kit():
                 arcname = file.relative_to(assets_dir)
                 zipf.write(file, arcname)
                 print(f"📦 Added {arcname}")
-    
+
     size_mb = output_zip.stat().st_size / (1024 * 1024)
     print(f"\n✅ Created press-kit.zip ({size_mb:.2f} MB)")
 
@@ -2117,31 +2117,31 @@ def validate_assets():
         "site/assets/press/logo.png",
         "site/assets/press/og-image.png",
     ]
-    
+
     missing = []
     for asset in required_assets:
         if not Path(asset).exists():
             missing.append(asset)
-    
+
     if missing:
         print("❌ Missing required assets:")
         for asset in missing:
             print(f"   - {asset}")
         return False
-    
+
     print("✅ All required assets present")
     return True
 
 def main():
     print("🔨 Building assets...\n")
-    
+
     if not validate_assets():
         print("\n⚠️  Please add missing assets before building")
         return 1
-    
+
     optimize_images()
     create_press_kit()
-    
+
     print("\n✨ Asset build complete!")
     return 0
 
@@ -2211,7 +2211,7 @@ Implemented at [schemas/scenario_schema.json](schemas/scenario_schema.json)
           "minimum": 0,
           "description": "Budget constraint"
         }
-      
+
 ---
 ## Next Actions
 

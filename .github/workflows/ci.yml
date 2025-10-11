@@ -37,17 +37,11 @@ jobs:
       - name: Install project (dev dependencies)
         run: poetry install --no-interaction --no-ansi
 
-      - name: Black (format check)
-        run: poetry run black --check .
+      - name: Install pre-commit
+        run: poetry run pre-commit install
 
-      - name: isort (import ordering)
-        run: poetry run isort --check-only --diff .
-
-      - name: Flake8 (lint)
-        run: poetry run flake8 src tests
-
-      - name: Mypy (type checks)
-        run: poetry run mypy src || true
+      - name: Run pre-commit (quality gates)
+        run: poetry run pre-commit run --all-files
 
       - name: Run tests with pytest
         run: poetry run pytest -q

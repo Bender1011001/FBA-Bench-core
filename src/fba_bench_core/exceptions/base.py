@@ -11,6 +11,7 @@ Classes:
 - AgentError: Raised for errors during agent execution or lifecycle.
 """
 
+
 class FBABenchException(Exception):
     """Base exception for fba_bench_core.
 
@@ -18,6 +19,7 @@ class FBABenchException(Exception):
     callers can catch library errors without accidentally catching other
     exceptions that inherit directly from Exception.
     """
+
     pass
 
 
@@ -27,6 +29,7 @@ class ConfigurationError(FBABenchException):
     Examples include invalid config values, missing required settings, or
     failure to parse configuration files.
     """
+
     pass
 
 
@@ -36,6 +39,7 @@ class AgentError(FBABenchException):
     Use this when an agent encounters an unrecoverable error during
     planning, execution, or coordination.
     """
+
     pass
 
 

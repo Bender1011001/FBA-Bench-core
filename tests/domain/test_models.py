@@ -1,4 +1,5 @@
 """Tests for domain models: Product, InventorySnapshot, CompetitorListing, Competitor, DemandProfile."""
+
 from decimal import Decimal
 
 import pytest
@@ -33,7 +34,9 @@ def test_product_happy_path_decimal_and_invariants():
     "cost,price,expected_msg",
     [
         ("5.00", "4.00", "price must be greater than or equal to cost"),
-        ("-1.00", "1.00", "Monetary values must be non-negative"),
+        ("-1.00", "1.00", "Monetary values must be positive"),
+        ("0.00", "1.00", "Monetary values must be positive"),
+        ("1.00", "0.00", "Monetary values must be positive"),
     ],
 )
 def test_product_price_vs_cost_and_negative_cost(cost, price, expected_msg):
@@ -46,7 +49,13 @@ def test_product_negative_stock_and_exceeds_max_inventory():
     with pytest.raises(ValidationError):
         Product(product_id="p-neg-stock", cost="1.00", price="2.00", stock=-1)
     with pytest.raises(ValidationError):
-        Product(product_id="p-too-many", cost="1.00", price="2.00", stock=11, max_inventory=10)
+        Product(
+            product_id="p-too-many",
+            cost="1.00",
+            price="2.00",
+            stock=11,
+            max_inventory=10,
+        )
 
 
 def test_product_invalid_decimal_string_for_money():
@@ -77,7 +86,13 @@ def test_inventory_snapshot_validation_and_reserved_logic():
 
 
 def test_competitor_listing_price_coercion_and_non_negative():
-    cl = CompetitorListing(sku="c1", price="3.00", rating=4.0, fulfillment_latency=2, marketplace="amazon.com")
+    cl = CompetitorListing(
+        sku="c1",
+        price="3.00",
+        rating=4.0,
+        fulfillment_latency=2,
+        marketplace="amazon.com",
+    )
     assert isinstance(cl.price, Decimal) and cl.price == Decimal("3.00")
     # negative competitor price invalid
     with pytest.raises(ValidationError):

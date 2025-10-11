@@ -2,11 +2,12 @@
 Lightweight import smoke test for FBA-Bench Core.
 
 Usage (from repository root):
-  python -c "import runpy; runpy.run_path('repos/fba-bench-core/scripts/smoke_import.py')"
+  python -c "import runpy; runpy.run_path('scripts/smoke_import.py')"
 Expected output: lines indicating successful imports.
 """
+
+
 def main() -> None:
-    ok = True
     failures = []
 
     def try_import(mod):
@@ -36,6 +37,7 @@ def main() -> None:
     if failures:
         raise SystemExit(f"Smoke import failures: {failures}")
     print("All core smoke imports succeeded.")
+
 
 if __name__ == "__main__":
     main()

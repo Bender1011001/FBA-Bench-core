@@ -13,13 +13,12 @@ Downstream guidance:
 from __future__ import annotations
 
 import re
-from typing import Dict, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Allowed primitive metadata value types. Reject nested dicts/lists to avoid
 # arbitrary deep structures hiding Any.
-Primitive = Union[str, int, float, bool]
+Primitive = str | int | float | bool
 
 
 def _validate_slug(value: str, field_name: str) -> str:
@@ -47,7 +46,6 @@ class BaseConfigModel(BaseModel):
         extra="forbid",
         validate_assignment=True,
         frozen=True,
-        allow_population_by_field_name=True,
     )
 
 
@@ -69,10 +67,10 @@ class BaseAgentConfig(BaseConfigModel):
     """
 
     agent_id: str
-    poll_interval_seconds: Optional[int] = None
-    max_concurrent_tasks: Optional[int] = None
-    default_region: Optional[str] = None
-    metadata: Dict[str, Primitive] = Field(default_factory=dict)
+    poll_interval_seconds: int | None = None
+    max_concurrent_tasks: int | None = None
+    default_region: str | None = None
+    metadata: dict[str, Primitive] = Field(default_factory=dict)
 
     @field_validator("agent_id")
     @classmethod
@@ -81,7 +79,7 @@ class BaseAgentConfig(BaseConfigModel):
 
     @field_validator("poll_interval_seconds", "max_concurrent_tasks")
     @classmethod
-    def _non_negative_ints(cls, v: Optional[int]) -> Optional[int]:
+    def _non_negative_ints(cls, v: int | None) -> int | None:
         if v is None:
             return v
         if v < 0:
@@ -90,7 +88,7 @@ class BaseAgentConfig(BaseConfigModel):
 
     @field_validator("metadata")
     @classmethod
-    def _validate_metadata(cls, v: Dict[str, Primitive]) -> Dict[str, Primitive]:
+    def _validate_metadata(cls, v: dict[str, Primitive]) -> dict[str, Primitive]:
         if not isinstance(v, dict):
             raise ValueError("metadata must be a mapping of str -> primitive values")
         for k, val in v.items():
@@ -117,10 +115,10 @@ class BaseServiceConfig(BaseConfigModel):
     """
 
     service_id: str
-    poll_interval_seconds: Optional[int] = None
-    max_concurrent_tasks: Optional[int] = None
-    default_region: Optional[str] = None
-    metadata: Dict[str, Primitive] = Field(default_factory=dict)
+    poll_interval_seconds: int | None = None
+    max_concurrent_tasks: int | None = None
+    default_region: str | None = None
+    metadata: dict[str, Primitive] = Field(default_factory=dict)
 
     @field_validator("service_id")
     @classmethod
@@ -129,7 +127,7 @@ class BaseServiceConfig(BaseConfigModel):
 
     @field_validator("poll_interval_seconds", "max_concurrent_tasks")
     @classmethod
-    def _non_negative_ints(cls, v: Optional[int]) -> Optional[int]:
+    def _non_negative_ints(cls, v: int | None) -> int | None:
         if v is None:
             return v
         if v < 0:
@@ -138,7 +136,7 @@ class BaseServiceConfig(BaseConfigModel):
 
     @field_validator("metadata")
     @classmethod
-    def _validate_metadata(cls, v: Dict[str, Primitive]) -> Dict[str, Primitive]:
+    def _validate_metadata(cls, v: dict[str, Primitive]) -> dict[str, Primitive]:
         # Reuse same validation semantics as agent metadata.
         if not isinstance(v, dict):
             raise ValueError("metadata must be a mapping of str -> primitive values")

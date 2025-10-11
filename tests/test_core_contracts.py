@@ -12,32 +12,33 @@ Notes:
 - Uses Decimal for precise monetary assertions.
 - Tests reflect current model behavior in source files under src/fba_bench_core/.
 """
-from datetime import datetime, timedelta
+
+from datetime import datetime
 from decimal import Decimal
 
 import pytest
 from pydantic import ValidationError
 
+from fba_bench_core.config import BaseAgentConfig, BaseServiceConfig
 from fba_bench_core.domain import (
-    Product,
-    InventorySnapshot,
-    CompetitorListing,
     Competitor,
+    CompetitorListing,
     DemandProfile,
+    InventorySnapshot,
+    Product,
 )
 from fba_bench_core.domain.events import (
-    SaleOccurred,
-    PriceChangedExternally,
-    StockReplenished,
-    PromotionLaunched,
-    DemandSpiked,
     AdjustPriceCommand,
+    DemandSpiked,
     PlaceReplenishmentOrderCommand,
+    PriceChangedExternally,
+    PromotionLaunched,
     ResolveCustomerIssueCommand,
-    get_event_class_for_type,
+    SaleOccurred,
+    StockReplenished,
     get_command_class_for_type,
+    get_event_class_for_type,
 )
-from fba_bench_core.config import BaseAgentConfig, BaseServiceConfig
 
 
 # -------------------------
@@ -114,10 +115,19 @@ def test_inventory_snapshot_negative_values_and_reserved_logic():
 
 def test_competitor_listing_and_unique_skus():
     # valid listing
-    cl = CompetitorListing(sku="csku1", price="3.00", rating=4.5, fulfillment_latency=1, marketplace="amazon.com")
+    cl = CompetitorListing(
+        sku="csku1",
+        price="3.00",
+        rating=4.5,
+        fulfillment_latency=1,
+        marketplace="amazon.com",
+    )
     assert isinstance(cl.price, Decimal) and cl.price == Decimal("3.00")
     # competitor with duplicate SKU should raise
-    c = {"competitor_id": "comp1", "listings": [cl, CompetitorListing(sku="csku1", price="4.00")]}
+    c = {
+        "competitor_id": "comp1",
+        "listings": [cl, CompetitorListing(sku="csku1", price="4.00")],
+    }
     with pytest.raises(ValidationError):
         Competitor(**c)
 
@@ -133,7 +143,13 @@ def test_demand_profile_invalid_std_and_happy_path():
 # Event tests
 # -------------------------
 def test_sale_occurred_happy_path_and_invalid_values():
-    evt = SaleOccurred(order_id="o1", product_id="p1", quantity=2, revenue=Decimal("10.50"), gross_margin=Decimal("0.2"))
+    evt = SaleOccurred(
+        order_id="o1",
+        product_id="p1",
+        quantity=2,
+        revenue=Decimal("10.50"),
+        gross_margin=Decimal("0.2"),
+    )
     assert evt.event_type == "sale_occurred"
     assert isinstance(evt.timestamp, datetime)
     # invalid revenue (<=0) and invalid quantity (<1)
@@ -143,7 +159,12 @@ def test_sale_occurred_happy_path_and_invalid_values():
         SaleOccurred(order_id="o3", quantity=1, revenue=Decimal("-1.00"))
     # gross_margin out of bounds
     with pytest.raises(ValidationError):
-        SaleOccurred(order_id="o4", quantity=1, revenue=Decimal("1.00"), gross_margin=Decimal("2.0"))
+        SaleOccurred(
+            order_id="o4",
+            quantity=1,
+            revenue=Decimal("1.00"),
+            gross_margin=Decimal("2.0"),
+        )
 
 
 def test_price_changed_externally_embeds_competitor_listing():
@@ -165,11 +186,17 @@ def test_stock_replenished_requires_snapshot_or_quantity():
 def test_promotion_launched_discount_bounds_and_coercion():
     start = datetime.utcnow()
     # valid discount as string/Decimal
-    promo = PromotionLaunched(promotion_id="promo1", discount_percent="0.25", start=start, product_ids=["p1"])
-    assert isinstance(promo.discount_percent, Decimal) and promo.discount_percent == Decimal("0.25")
+    promo = PromotionLaunched(
+        promotion_id="promo1", discount_percent="0.25", start=start, product_ids=["p1"]
+    )
+    assert isinstance(
+        promo.discount_percent, Decimal
+    ) and promo.discount_percent == Decimal("0.25")
     # discount out of range
     with pytest.raises(ValidationError):
-        PromotionLaunched(promotion_id="promo2", discount_percent=Decimal("1.5"), start=start)
+        PromotionLaunched(
+            promotion_id="promo2", discount_percent=Decimal("1.5"), start=start
+        )
 
 
 def test_demand_spiked_delta_coercion_and_validation():
@@ -184,7 +211,9 @@ def test_demand_spiked_delta_coercion_and_validation():
 # -------------------------
 def test_adjust_price_command_decimal_coercion_and_boundaries():
     cmd = AdjustPriceCommand(product_id="p1", proposed_price="3.50")
-    assert isinstance(cmd.proposed_price, Decimal) and cmd.proposed_price == Decimal("3.50")
+    assert isinstance(cmd.proposed_price, Decimal) and cmd.proposed_price == Decimal(
+        "3.50"
+    )
     # proposed_price negative invalid
     with pytest.raises(ValidationError):
         AdjustPriceCommand(product_id="p1", proposed_price=Decimal("-1.00"))
@@ -193,15 +222,21 @@ def test_adjust_price_command_decimal_coercion_and_boundaries():
 def test_place_replenishment_order_command_quantity_positive():
     with pytest.raises(ValidationError):
         PlaceReplenishmentOrderCommand(product_id="p1", quantity=0, supplier_id="s1")
-    cmd = PlaceReplenishmentOrderCommand(product_id="p1", quantity=5, supplier_id="s1", priority="high")
+    cmd = PlaceReplenishmentOrderCommand(
+        product_id="p1", quantity=5, supplier_id="s1", priority="high"
+    )
     assert cmd.quantity == 5 and cmd.priority == "high"
 
 
 def test_resolve_customer_issue_command_refund_coercion_and_negative_invalid():
     with pytest.raises(ValidationError):
-        ResolveCustomerIssueCommand(resolution_action="fix", refund_amount=Decimal("-1.0"))
+        ResolveCustomerIssueCommand(
+            resolution_action="fix", refund_amount=Decimal("-1.0")
+        )
     cmd = ResolveCustomerIssueCommand(resolution_action="refund", refund_amount="2.50")
-    assert isinstance(cmd.refund_amount, Decimal) and cmd.refund_amount == Decimal("2.50")
+    assert isinstance(cmd.refund_amount, Decimal) and cmd.refund_amount == Decimal(
+        "2.50"
+    )
     assert cmd.command_type == "resolve_customer_issue"
 
 
@@ -219,7 +254,11 @@ def test_registry_lookup_helpers_return_expected_and_none_for_unknown():
 # Configuration tests
 # -------------------------
 def test_base_agent_config_happy_and_invalid_cases_and_immutability():
-    cfg = BaseAgentConfig(agent_id="agent_1", poll_interval_seconds=30, metadata={"env": "test", "retries": 3})
+    cfg = BaseAgentConfig(
+        agent_id="agent_1",
+        poll_interval_seconds=30,
+        metadata={"env": "test", "retries": 3},
+    )
     assert cfg.agent_id == "agent_1"
     assert cfg.poll_interval_seconds == 30
     assert cfg.metadata["env"] == "test"

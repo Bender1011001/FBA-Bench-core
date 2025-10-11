@@ -3,10 +3,10 @@
 This module introduces a typed configuration contract for services and a
 minimal abstract base class that requires a validated configuration object.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict
 
 from fba_bench_core.config import BaseServiceConfig
 
@@ -40,7 +40,7 @@ class BaseService(ABC):
         """Return the typed configuration object for this service."""
         return self._config
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> dict:
         """Return a serializable shallow mapping of the configuration."""
         return self._config.model_dump()
 

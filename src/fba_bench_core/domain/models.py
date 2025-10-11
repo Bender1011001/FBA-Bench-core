@@ -19,7 +19,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -33,7 +32,8 @@ class Product(BaseModel):
 
     Business invariants and rationale:
     - price and cost are Decimal to preserve financial precision.
-    - price must be >= cost at the domain level to avoid modeling systemic losses.
+    - cost must be > 0 to ensure positive landed costs.
+    - price must be > 0 and >= cost at the domain level to avoid modeling systemic losses.
       Allowing price == cost supports break-even scenarios; intentional loss-leading
       promotions (price < cost) are an application/simulation-level decision and
       should be represented via promotions/events rather than a contract-level rule.
@@ -45,21 +45,31 @@ class Product(BaseModel):
 
     # Identifiers and classification
     product_id: str = Field(..., description="Canonical product identifier (internal).")
-    sku: Optional[str] = Field(None, description="Stock keeping unit; may match marketplace SKU.")
-    name: Optional[str] = Field(None, description="Human-readable product title.")
-    category: Optional[str] = Field(None, description="Category or taxonomy for aggregation/segmentation.")
+    sku: str | None = Field(
+        None, description="Stock keeping unit; may match marketplace SKU."
+    )
+    name: str | None = Field(None, description="Human-readable product title.")
+    category: str | None = Field(
+        None, description="Category or taxonomy for aggregation/segmentation."
+    )
 
     # Monetary fields (Decimal for precision)
-    cost: Decimal = Field(..., description="Per-unit landed cost (Decimal). Must be >= 0.")
-    price: Decimal = Field(..., description="Per-unit listing price (Decimal). Must be >= cost.")
+    cost: Decimal = Field(
+        ..., description="Per-unit landed cost (Decimal). Must be > 0."
+    )
+    price: Decimal = Field(
+        ..., description="Per-unit listing price (Decimal). Must be > 0 and >= cost."
+    )
 
     # Inventory and fulfillment
-    stock: int = Field(0, description="Available on-hand units (must be non-negative integer).")
-    max_inventory: Optional[int] = Field(
+    stock: int = Field(
+        0, description="Available on-hand units (must be non-negative integer)."
+    )
+    max_inventory: int | None = Field(
         None,
         description="Optional maximum stock allowed; if set, stock must not exceed this ceiling.",
     )
-    fulfillment_latency: Optional[int] = Field(
+    fulfillment_latency: int | None = Field(
         None,
         description="Expected fulfillment latency in days (integer). Used by fulfillment & SLAs.",
         ge=0,
@@ -88,9 +98,9 @@ class Product(BaseModel):
 
     @field_validator("cost", "price")
     @classmethod
-    def _non_negative_money(cls, v: Decimal):
-        if v < Decimal("0"):
-            raise ValueError("Monetary values must be non-negative")
+    def _positive_money(cls, v: Decimal):
+        if v <= Decimal("0"):
+            raise ValueError("Monetary values must be positive")
         return v
 
     @field_validator("stock", "max_inventory", mode="before")
@@ -139,14 +149,23 @@ class InventorySnapshot(BaseModel):
       used by forecasting, fulfillment routing, and reconciliation.
     """
 
-    product_id: str = Field(..., description="Canonical product identifier this snapshot refers to.")
-    available_units: int = Field(..., ge=0, description="Units available for sale/fulfillment.")
-    reserved_units: int = Field(0, ge=0, description="Units reserved for pending orders.")
-    warehouse_location: Optional[str] = Field(
+    product_id: str = Field(
+        ..., description="Canonical product identifier this snapshot refers to."
+    )
+    available_units: int = Field(
+        ..., ge=0, description="Units available for sale/fulfillment."
+    )
+    reserved_units: int = Field(
+        0, ge=0, description="Units reserved for pending orders."
+    )
+    warehouse_location: str | None = Field(
         None,
         description="Identifier for warehouse/fulfillment center (optional).",
     )
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="UTC timestamp of snapshot capture.")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="UTC timestamp of snapshot capture.",
+    )
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
@@ -170,11 +189,17 @@ class CompetitorListing(BaseModel):
     - Fulfillment latency and marketplace are important signals for win-rate models.
     """
 
-    sku: Optional[str] = Field(None, description="Competitor SKU, if available.")
+    sku: str | None = Field(None, description="Competitor SKU, if available.")
     price: Decimal = Field(..., description="Competitor listing price (Decimal).")
-    rating: Optional[float] = Field(None, ge=0.0, le=5.0, description="Optional customer rating (0-5).")
-    fulfillment_latency: Optional[int] = Field(None, ge=0, description="Fulfillment latency in days.")
-    marketplace: Optional[str] = Field(None, description="Marketplace or channel name (e.g., 'amazon.com').")
+    rating: float | None = Field(
+        None, ge=0.0, le=5.0, description="Optional customer rating (0-5)."
+    )
+    fulfillment_latency: int | None = Field(
+        None, ge=0, description="Fulfillment latency in days."
+    )
+    marketplace: str | None = Field(
+        None, description="Marketplace or channel name (e.g., 'amazon.com')."
+    )
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
@@ -207,19 +232,23 @@ class Competitor(BaseModel):
     """
 
     competitor_id: str = Field(..., description="Unique identifier for the competitor.")
-    name: Optional[str] = Field(None, description="Display name for the competitor.")
-    listings: List[CompetitorListing] = Field(default_factory=list, description="Listings offered by the competitor.")
-    operating_regions: Optional[List[str]] = Field(
+    name: str | None = Field(None, description="Display name for the competitor.")
+    listings: list[CompetitorListing] = Field(
+        default_factory=list, description="Listings offered by the competitor."
+    )
+    operating_regions: list[str] | None = Field(
         None,
         description="ISO region codes or region identifiers where the competitor operates.",
     )
-    primary_marketplace: Optional[str] = Field(None, description="Primary marketplace/channel name.")
+    primary_marketplace: str | None = Field(
+        None, description="Primary marketplace/channel name."
+    )
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
     @model_validator(mode="after")
     def _unique_listing_skus(self):
-        skus = [l.sku for l in self.listings if l.sku is not None]
+        skus = [listing.sku for listing in self.listings if listing.sku is not None]
         if len(skus) != len(set(skus)):
             raise ValueError("Competitor listings must have unique SKUs when provided")
         return self
@@ -236,10 +265,17 @@ class DemandProfile(BaseModel):
     """
 
     product_id: str = Field(..., description="Product this demand profile pertains to.")
-    daily_demand_mean: float = Field(..., ge=0.0, description="Mean expected daily demand (units/day).")
-    daily_demand_std: float = Field(0.0, ge=0.0, description="Standard deviation for daily demand.")
+    daily_demand_mean: float = Field(
+        ..., ge=0.0, description="Mean expected daily demand (units/day)."
+    )
+    daily_demand_std: float = Field(
+        0.0, ge=0.0, description="Standard deviation for daily demand."
+    )
 
-    segment: Optional[str] = Field(None, description="Optional customer segment identifier (e.g., 'value', 'business').")
+    segment: str | None = Field(
+        None,
+        description="Optional customer segment identifier (e.g., 'value', 'business').",
+    )
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 

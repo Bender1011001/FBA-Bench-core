@@ -124,3 +124,21 @@
     or CI were modified as part of Phase G.
   - Phase H will execute tooling (towncrier changelog generation, CI-run to
     validate formatting/linting/type-checking commands against the rebuilt core).
+
+## 2025-10-06 – Phase G′ Documentation Alignment
+
+- Timestamp (UTC): 2025-10-06T00:00:29.315Z
+- Branch: rescue/core-rebuild
+- Action: Aligned documentation with rebuilt architecture and provided migration guidance.
+- Changes made:
+  - README.md updated to reflect contract-first approach, typed configs, expanded events/commands, and added references to new tooling (pre-commit, towncrier).
+  - docs/architecture/core-contracts.md updated with new invariants (e.g., price >= cost, stock >=0, unique SKUs), expanded events/commands taxonomy, and detailed typed config fields/metadata.
+  - New migration guide created: `docs/migration-guide.md` with summary of changes (demolition, invariants, typed configs), migration steps for consumers (update imports, use typed configs, handle new validations), and breaking changes/deprecations.
+- Critical assets referenced:
+  - Migration guide: `docs/migration-guide.md`
+  - Updated contracts: `src/fba_bench_core/domain/models.py`, `src/fba_bench_core/domain/events.py`, `src/fba_bench_core/config.py`
+  - Tooling: `.pre-commit-config.yaml`, `.towncrier.toml`
+- Notes:
+  - Documentation updates align with Phases A′–F′ completion; no code changes made.
+  - Migration guidance provided for consumers upgrading to the rebuilt core.
+  - Phase G′ completes documentation alignment; final summary provided below.

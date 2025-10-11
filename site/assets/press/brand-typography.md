@@ -1,7 +1,7 @@
 # FBA-Bench Brand Typography
 
 ## Primary Font Family
-- **System UI Stack**: `system-ui, -apple-system, Segoe UI, Roboto, sans-serif`  
+- **System UI Stack**: `system-ui, -apple-system, Segoe UI, Roboto, sans-serif`
   Usage: All body text, headings, and UI elements. Ensures native look across platforms (macOS, Windows, Android, iOS).
 
 ## Font Weights and Sizes

@@ -20,7 +20,7 @@ Author: Bender1011001 <147673094+Bender1011001@users.noreply.github.com>
 Date:   Thu Oct 2 23:46:22 2025 -0700
 
     docs(ship-guide): finalize ship-readiness with status, links, next steps
-    
+
     - Add “Ship-Readiness Execution Status” at the top of [docs/fba_bench_ship_guide.md](docs/fba_bench_ship_guide.md) summarizing:
       - P0: Completed (one subtrack blocked for ARXIV_ID)
       - P1: Completed
@@ -39,7 +39,7 @@ Date:   Thu Oct 2 23:46:22 2025 -0700
       - Re-run CI [.github/workflows/ci.yml](.github/workflows/ci.yml) and local validators [scripts/validate_all.py](scripts/validate_all.py), [scripts/validate_scenarios.py](scripts/validate_scenarios.py)
     - Scrub placeholders: removed stray “TODO”, “FIXME”, “XXXXX”, “placeholder” text outside example search commands
     - Ensure all links resolve to existing paths in the repo
-    
+
     Docs-only change; no functional code modifications.
 
  .devcontainer/devcontainer.json          |   52 +

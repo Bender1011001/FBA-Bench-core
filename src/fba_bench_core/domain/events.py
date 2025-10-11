@@ -13,19 +13,15 @@ Rationale:
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, Literal, Optional, Tuple, Type, Union
-import re
+from enum import Enum
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from .models import (
-    CompetitorListing,
-    DemandProfile,
-    InventorySnapshot,
-    Product,
-)
+from .models import CompetitorListing, DemandProfile, InventorySnapshot
 
 # ---------------------------------------------------------------------------
 # Base classes
@@ -47,7 +43,7 @@ class BaseEvent(BaseModel):
     event_type: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     tick: int = Field(0, ge=0)
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
 
 
 class Command(BaseModel):
@@ -66,15 +62,14 @@ class Command(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     command_type: str
-    issued_by: Optional[str] = None
-    reason: Optional[str] = None
-    correlation_id: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-
+    issued_by: str | None = None
+    reason: str | None = None
+    correlation_id: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("metadata")
     @classmethod
-    def _validate_metadata(cls, v: Dict[str, Any]):
+    def _validate_metadata(cls, v: dict[str, Any]):
         # Keep metadata shallow and keyed by str to encourage typed schemas.
         if not isinstance(v, dict):
             raise TypeError("metadata must be a dict[str, Any]")
@@ -103,15 +98,16 @@ class SaleOccurred(BaseEvent):
     event_type: Literal["sale_occurred"] = "sale_occurred"
 
     order_id: str
-    product_id: Optional[str] = None
-    product_sku: Optional[str] = None
+    product_id: str | None = None
+    product_sku: str | None = None
     quantity: int = Field(..., ge=1)
     revenue: Decimal = Field(..., gt=Decimal("0"))
     currency: str = Field("USD", min_length=3, description="ISO currency code")
-    channel: Optional[str] = None
-    customer_segment: Optional[str] = None
-    gross_margin: Optional[Decimal] = Field(
-        None, description="Gross margin expressed as Decimal fraction (0.0 == 0%, 1.0 == 100%)"
+    channel: str | None = None
+    customer_segment: str | None = None
+    gross_margin: Decimal | None = Field(
+        None,
+        description="Gross margin expressed as Decimal fraction (0.0 == 0%, 1.0 == 100%)",
     )
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
@@ -162,7 +158,7 @@ class DemandSpiked(BaseEvent):
     product_id: str
     delta: Decimal = Field(..., gt=Decimal("0"))
     trigger: str
-    demand_profile: Optional[DemandProfile] = None
+    demand_profile: DemandProfile | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -175,6 +171,22 @@ class DemandSpiked(BaseEvent):
             return Decimal(str(v))
         except Exception as exc:
             raise ValueError("delta must be numeric") from exc
+
+
+class CompetitorAction(BaseEvent):
+    """Event signalling a competitor's strategic action (e.g., price change, promotion launch).
+
+    - action_type: categorized action (e.g., 'price_adjustment', 'promotion_launch', 'inventory_change')
+    - details: optional structured details about the action.
+    """
+
+    event_type: Literal["competitor_action"] = "competitor_action"
+
+    competitor_id: str
+    action_type: str
+    details: dict[str, Any] | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 # ---------------------------------------------------------------------------
@@ -192,10 +204,10 @@ class StockReplenished(BaseEvent):
     event_type: Literal["stock_replenished"] = "stock_replenished"
 
     product_id: str
-    snapshot_before: Optional[InventorySnapshot] = None
-    snapshot_after: Optional[InventorySnapshot] = None
-    warehouse_location: Optional[str] = None
-    quantity_added: Optional[int] = Field(None, gt=0)
+    snapshot_before: InventorySnapshot | None = None
+    snapshot_after: InventorySnapshot | None = None
+    warehouse_location: str | None = None
+    quantity_added: int | None = Field(None, gt=0)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -218,8 +230,8 @@ class StockDepleted(BaseEvent):
     event_type: Literal["stock_depleted"] = "stock_depleted"
 
     product_id: str
-    safety_stock: Optional[int] = None
-    current_snapshot: Optional[InventorySnapshot] = None
+    safety_stock: int | None = None
+    current_snapshot: InventorySnapshot | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -231,7 +243,24 @@ class FulfillmentDelayed(BaseEvent):
 
     order_id: str
     delay_hours: float = Field(..., ge=0.0)
-    reason: Optional[str] = None
+    reason: str | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class SupplyDisruption(BaseEvent):
+    """Event emitted when a supply chain disruption occurs (e.g., supplier delay, shortage).
+
+    - disruption_type: type of disruption (e.g., 'supplier_delay', 'material_shortage', 'logistics_issue')
+    - impact_description: optional details on the impact.
+    """
+
+    event_type: Literal["supply_disruption"] = "supply_disruption"
+
+    product_id: str
+    supplier_id: str
+    disruption_type: str
+    impact_description: str | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -250,12 +279,12 @@ class PromotionLaunched(BaseEvent):
     event_type: Literal["promotion_launched"] = "promotion_launched"
 
     promotion_id: str
-    product_ids: Optional[list[str]] = None
-    category: Optional[str] = None
+    product_ids: list[str] | None = None
+    category: str | None = None
     discount_percent: Decimal = Field(..., ge=Decimal("0"), le=Decimal("1"))
     start: datetime
-    end: Optional[datetime] = None
-    channels: Optional[list[str]] = None
+    end: datetime | None = None
+    channels: list[str] | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -276,11 +305,11 @@ class CustomerComplaintLogged(BaseEvent):
     event_type: Literal["customer_complaint_logged"] = "customer_complaint_logged"
 
     complaint_id: str
-    order_id: Optional[str] = None
-    product_id: Optional[str] = None
+    order_id: str | None = None
+    product_id: str | None = None
     issue_type: str
-    details: Optional[str] = None
-    resolution_deadline: Optional[datetime] = None
+    details: str | None = None
+    resolution_deadline: datetime | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -311,8 +340,8 @@ class AnomalyDetected(BaseEvent):
     event_type: Literal["anomaly_detected"] = "anomaly_detected"
 
     summary: str
-    metrics: Optional[Dict[str, Any]] = None
-    severity: Optional[Literal["low", "medium", "high", "critical"]] = "low"
+    metrics: dict[str, Any] | None = None
+    severity: Literal["low", "medium", "high", "critical"] | None = "low"
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -333,11 +362,11 @@ class AdjustPriceCommand(Command):
 
     command_type: Literal["adjust_price"] = "adjust_price"
 
-    product_id: Optional[str] = None
-    product_sku: Optional[str] = None
+    product_id: str | None = None
+    product_sku: str | None = None
     proposed_price: Decimal = Field(..., ge=Decimal("0"))
-    effective_from: Optional[datetime] = None
-    channel: Optional[str] = None
+    effective_from: datetime | None = None
+    channel: str | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -361,13 +390,13 @@ class LaunchPromotionCommand(Command):
     command_type: Literal["launch_promotion"] = "launch_promotion"
 
     promotion_id: str
-    product_ids: Optional[list[str]] = None
-    category: Optional[str] = None
+    product_ids: list[str] | None = None
+    category: str | None = None
     discount_percent: Decimal = Field(..., ge=Decimal("0"), le=Decimal("1"))
     start: datetime
-    end: Optional[datetime] = None
-    channels: Optional[list[str]] = None
-    notes: Optional[str] = None
+    end: datetime | None = None
+    channels: list[str] | None = None
+    notes: str | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -395,8 +424,8 @@ class PlaceReplenishmentOrderCommand(Command):
     product_id: str
     quantity: int = Field(..., gt=0)
     supplier_id: str
-    target_warehouse: Optional[str] = None
-    priority: Optional[Literal["low", "normal", "high", "urgent"]] = "normal"
+    target_warehouse: str | None = None
+    priority: Literal["low", "normal", "high", "urgent"] | None = "normal"
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -425,6 +454,22 @@ class UpdateSafetyStockCommand(Command):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
+class AdjustInventoryCommand(Command):
+    """Command to adjust inventory levels for a product (e.g., manual correction, write-off).
+
+    - adjustment_quantity: positive for increase, negative for decrease.
+    - warehouse_location: optional specific warehouse.
+    """
+
+    command_type: Literal["adjust_inventory"] = "adjust_inventory"
+
+    product_id: str
+    adjustment_quantity: int
+    warehouse_location: str | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
 # ---------------------------------------------------------------------------
 # Commands: Customer & Marketing
 # ---------------------------------------------------------------------------
@@ -438,10 +483,10 @@ class ResolveCustomerIssueCommand(Command):
 
     command_type: Literal["resolve_customer_issue"] = "resolve_customer_issue"
 
-    complaint_id: Optional[str] = None
-    order_id: Optional[str] = None
+    complaint_id: str | None = None
+    order_id: str | None = None
     resolution_action: str
-    refund_amount: Optional[Decimal] = Field(None, ge=Decimal("0"))
+    refund_amount: Decimal | None = Field(None, ge=Decimal("0"))
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -465,8 +510,24 @@ class StartCustomerOutreachCommand(Command):
 
     segment: str
     message_template: str
-    goal_metrics: Optional[Dict[str, Any]] = None
-    channels: Optional[list[str]] = None
+    goal_metrics: dict[str, Any] | None = None
+    channels: list[str] | None = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class RespondToComplaintCommand(Command):
+    """Command to respond to a customer complaint.
+
+    - response_action: type of response (e.g., 'apology', 'refund', 'replacement')
+    - response_message: optional detailed message to the customer.
+    """
+
+    command_type: Literal["respond_to_complaint"] = "respond_to_complaint"
+
+    complaint_id: str
+    response_action: str
+    response_message: str | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -483,7 +544,7 @@ class ReforecastDemandCommand(Command):
 
     product_id: str
     timeframe_days: int = Field(..., gt=0)
-    reason: Optional[str] = None
+    reason: str | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -499,36 +560,72 @@ class AdjustFulfillmentLatencyCommand(Command):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
+class NegotiateSupplyCommand(Command):
+    """Command to negotiate supply terms with a supplier.
+
+    - negotiation_terms: structured terms being negotiated (e.g., price, lead_time).
+    """
+
+    command_type: Literal["negotiate_supply"] = "negotiate_supply"
+
+    supplier_id: str
+    product_id: str
+    negotiation_terms: dict[str, Any]
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class MonitorCompetitorCommand(Command):
+    """Command to initiate monitoring of a competitor's activities.
+
+    - monitoring_focus: areas to monitor (e.g., 'pricing', 'inventory', 'promotions').
+    """
+
+    command_type: Literal["monitor_competitor"] = "monitor_competitor"
+
+    competitor_id: str
+    monitoring_focus: list[str]
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
 # ---------------------------------------------------------------------------
 # Unions and registries
 # ---------------------------------------------------------------------------
 
-AnyEvent = Union[
-    SaleOccurred,
-    PriceChangedExternally,
-    DemandSpiked,
-    StockReplenished,
-    StockDepleted,
-    FulfillmentDelayed,
-    PromotionLaunched,
-    CustomerComplaintLogged,
-    ForecastUpdated,
-    AnomalyDetected,
-]
+AnyEvent = (
+    SaleOccurred
+    | PriceChangedExternally
+    | DemandSpiked
+    | CompetitorAction
+    | StockReplenished
+    | StockDepleted
+    | FulfillmentDelayed
+    | SupplyDisruption
+    | PromotionLaunched
+    | CustomerComplaintLogged
+    | ForecastUpdated
+    | AnomalyDetected
+)
 
-AnyCommand = Union[
-    AdjustPriceCommand,
-    LaunchPromotionCommand,
-    PlaceReplenishmentOrderCommand,
-    TransferInventoryCommand,
-    UpdateSafetyStockCommand,
-    ResolveCustomerIssueCommand,
-    StartCustomerOutreachCommand,
-    ReforecastDemandCommand,
-    AdjustFulfillmentLatencyCommand,
-]
+AnyCommand = (
+    AdjustPriceCommand
+    | LaunchPromotionCommand
+    | PlaceReplenishmentOrderCommand
+    | TransferInventoryCommand
+    | UpdateSafetyStockCommand
+    | AdjustInventoryCommand
+    | ResolveCustomerIssueCommand
+    | StartCustomerOutreachCommand
+    | RespondToComplaintCommand
+    | ReforecastDemandCommand
+    | AdjustFulfillmentLatencyCommand
+    | NegotiateSupplyCommand
+    | MonitorCompetitorCommand
+)
 
 # Optional: runtime registries mapping event_type/command_type to class for lookups.
+
 
 class EventRegistry(dict):
     """Lightweight compatibility wrapper around the event-type -> class mapping.
@@ -538,14 +635,14 @@ class EventRegistry(dict):
     introspection minimal and builds lightweight metadata on demand.
     """
 
-    def __init__(self, mapping: Dict[str, Type[BaseEvent]]):
+    def __init__(self, mapping: dict[str, type[BaseEvent]]):
         super().__init__(mapping)
 
-    def get_event_class(self, event_type: str) -> Optional[Type[BaseEvent]]:
+    def get_event_class(self, event_type: str) -> type[BaseEvent] | None:
         return self.get(event_type)
 
     @property
-    def event_metadata(self) -> Dict[str, Dict[str, Any]]:
+    def event_metadata(self) -> dict[str, dict[str, Any]]:
         """Return a mapping of event_type -> lightweight metadata dict.
 
         Each metadata dict contains:
@@ -553,7 +650,7 @@ class EventRegistry(dict):
         - doc: class docstring (may be None)
         - event_type: canonical event_type string
         """
-        md: Dict[str, Dict[str, Any]] = {}
+        md: dict[str, dict[str, Any]] = {}
         for k, cls in self.items():
             md[k] = {
                 "event_class": cls,
@@ -561,6 +658,7 @@ class EventRegistry(dict):
                 "event_type": getattr(cls, "event_type", k),
             }
         return md
+
 
 # Instantiate the registry using a robust extraction of the event_type value
 # to avoid triggering Pydantic's attribute machinery during module import.
@@ -571,13 +669,14 @@ def _camel_to_snake(name: str) -> str:
     return s2.replace("__", "_").lower()
 
 
-def _extract_event_type_from_class(cls: Type[BaseEvent]) -> str:
+def _extract_event_type_from_class(cls: type[BaseEvent]) -> str:
     # Prefer a simple literal default defined directly on the class (safe __dict__ access).
     val = cls.__dict__.get("event_type", None)
     if isinstance(val, str):
         return val
     # Fallback: derive snake_case from the class name (SaleOccurred -> sale_occurred)
     return _camel_to_snake(cls.__name__)
+
 
 _event_registry: EventRegistry = EventRegistry(
     {
@@ -586,9 +685,11 @@ _event_registry: EventRegistry = EventRegistry(
             SaleOccurred,
             PriceChangedExternally,
             DemandSpiked,
+            CompetitorAction,
             StockReplenished,
             StockDepleted,
             FulfillmentDelayed,
+            SupplyDisruption,
             PromotionLaunched,
             CustomerComplaintLogged,
             ForecastUpdated,
@@ -597,8 +698,9 @@ _event_registry: EventRegistry = EventRegistry(
     }
 )
 
+
 # Build the command registry robustly without invoking Pydantic attribute access.
-def _extract_command_type_from_class(cls: Type[Command]) -> str:
+def _extract_command_type_from_class(cls: type[Command]) -> str:
     # Prefer a simple literal default defined directly on the class (safe __dict__ access).
     val = cls.__dict__.get("command_type", None)
     if isinstance(val, str):
@@ -606,21 +708,26 @@ def _extract_command_type_from_class(cls: Type[Command]) -> str:
     # Fallback: derive snake_case from the class name (AdjustPriceCommand -> adjust_price_command)
     return _camel_to_snake(cls.__name__)
 
+
 # Build a robust command registry that exposes multiple lookup keys for compatibility:
 # - the explicit class literal (if present)
 # - snake_case derived from the class name
 # - a shortened form that strips a trailing "_command" suffix
-_command_registry: Dict[str, Type[Command]] = {}
+_command_registry: dict[str, type[Command]] = {}
 for cls in (
     AdjustPriceCommand,
     LaunchPromotionCommand,
     PlaceReplenishmentOrderCommand,
     TransferInventoryCommand,
     UpdateSafetyStockCommand,
+    AdjustInventoryCommand,
     ResolveCustomerIssueCommand,
     StartCustomerOutreachCommand,
+    RespondToComplaintCommand,
     ReforecastDemandCommand,
     AdjustFulfillmentLatencyCommand,
+    NegotiateSupplyCommand,
+    MonitorCompetitorCommand,
 ):
     # canonical literal (safe __dict__ read)
     literal = cls.__dict__.get("command_type")
@@ -638,8 +745,7 @@ for cls in (
 
 
 # -- EventType enum (dynamic, derived from the runtime registry) ----------------
-from enum import Enum
-import re
+
 
 def _safe_member_name(s: str) -> str:
     """Create a valid enum member name from an arbitrary event_type string."""
@@ -650,29 +756,35 @@ def _safe_member_name(s: str) -> str:
         name = "_" + name
     return name
 
+
 _event_type_members = {_safe_member_name(k): k for k in _event_registry.keys()}
 
 # Create a string-valued Enum so members behave like their canonical event_type strings.
-EventType = Enum("EventType", _event_type_members, type=str)  # type: ignore[call-arg]
+EventType = Enum("EventType", _event_type_members, type=str)  # type: ignore[misc]
 
 # Attach minimal metadata helpers to each member for compatibility with legacy expectations.
 for member in EventType:
-    cls = _event_registry.get(member.value)
+    cls = _event_registry.get(member.value)  # type: ignore[assignment]
     # Provide direct reference to the model class and a small metadata dict.
     setattr(member, "event_class", cls)
     setattr(
         member,
         "metadata",
-        {"event_class": cls, "doc": getattr(cls, "__doc__", None), "event_type": member.value},
+        {
+            "event_class": cls,
+            "doc": getattr(cls, "__doc__", None),
+            "event_type": member.value,
+        },
     )
 
+
 # Compatibility accessors (keep the previous function names and behaviors).
-def get_event_class_for_type(event_type: str) -> Optional[Type[BaseEvent]]:
+def get_event_class_for_type(event_type: str) -> type[BaseEvent] | None:
     """Return the event class for a given event_type or None if unknown."""
     return _event_registry.get_event_class(event_type)
 
 
-def get_command_class_for_type(command_type: str) -> Optional[Type[Command]]:
+def get_command_class_for_type(command_type: str) -> type[Command] | None:
     """Return the command class for a given command_type or None if unknown."""
     return _command_registry.get(command_type)
 
@@ -685,9 +797,11 @@ __all__ = [
     "SaleOccurred",
     "PriceChangedExternally",
     "DemandSpiked",
+    "CompetitorAction",
     "StockReplenished",
     "StockDepleted",
     "FulfillmentDelayed",
+    "SupplyDisruption",
     "PromotionLaunched",
     "CustomerComplaintLogged",
     "ForecastUpdated",
@@ -699,10 +813,14 @@ __all__ = [
     "PlaceReplenishmentOrderCommand",
     "TransferInventoryCommand",
     "UpdateSafetyStockCommand",
+    "AdjustInventoryCommand",
     "ResolveCustomerIssueCommand",
     "StartCustomerOutreachCommand",
+    "RespondToComplaintCommand",
     "ReforecastDemandCommand",
     "AdjustFulfillmentLatencyCommand",
+    "NegotiateSupplyCommand",
+    "MonitorCompetitorCommand",
     "AnyCommand",
     # Registries / helpers
     "get_event_class_for_type",

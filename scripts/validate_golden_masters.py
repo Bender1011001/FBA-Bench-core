@@ -10,10 +10,11 @@ Exit codes:
   0 = all JSON files under golden_masters/ parsed successfully or directory missing
   1 = one or more JSON files failed to parse
 """
+
+import glob
 import json
 import os
 import sys
-import glob
 
 
 def resolve_core_root() -> str:
@@ -34,7 +35,7 @@ def main() -> int:
     pattern = os.path.join(gm_dir, "**", "*.json")
     for path in glob.glob(pattern, recursive=True):
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 json.load(f)
             print(f"[OK] {os.path.relpath(path, core_root)}")
         except Exception as e:
